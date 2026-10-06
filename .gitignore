@@ -1,0 +1,20 @@
+# Python environment & cache
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# C# / .NET (Nếu nhóm làm bằng C# WPF)
+bin/
+obj/
+*.user
+
+# Loại bỏ các file kết quả tự sinh, nhưng giữ lại thư mục output
+output/*.csv
+!output/.gitkeep
+
+# Cấu hình IDE và Hệ điều hành
+.vscode/
+.idea/
+.DS_Store
