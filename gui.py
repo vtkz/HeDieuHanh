@@ -22,15 +22,15 @@ def launch_gui():
             
         def setup_ui(self):
             # Header
-            header = ttk.Label(self.root, text="MO PHONG CPU SCHEDULING - FCFS & SJF KHONG CUOP QUYEN", 
+            header = ttk.Label(self.root, text="MO PHONG CPU SCHEDULING - FCFS & SJF KHONG DOC QUYEN", 
                                font=("Arial", 14, "bold"))
             header.pack(pady=10)
             
             # Input Frame
-            input_frame = ttk.LabelFrame(self.root, text="Nhap Tien Trinh Thu Cong")
+            input_frame = ttk.LabelFrame(self.root, text="Nhập Tiến Trình Thủ Công")
             input_frame.pack(fill="x", padx=15, pady=5)
             
-            ttk.Label(input_frame, text="PID:").grid(row=0, column=0, padx=5, pady=5)
+            ttk.Label(input_frame, text="Process ID:").grid(row=0, column=0, padx=5, pady=5)
             self.entry_pid = ttk.Entry(input_frame, width=10)
             self.entry_pid.grid(row=0, column=1, padx=5, pady=5)
             
@@ -42,17 +42,17 @@ def launch_gui():
             self.entry_bt = ttk.Entry(input_frame, width=10)
             self.entry_bt.grid(row=0, column=5, padx=5, pady=5)
             
-            btn_add = ttk.Button(input_frame, text="Them Tiến Trình", command=self.add_process)
+            btn_add = ttk.Button(input_frame, text="add process", command=self.add_process)
             btn_add.grid(row=0, column=6, padx=10, pady=5)
             
-            btn_clear = ttk.Button(input_frame, text="Xóa Tat Cả", command=self.clear_all)
+            btn_clear = ttk.Button(input_frame, text="clear", command=self.clear_all)
             btn_clear.grid(row=0, column=7, padx=5, pady=5)
 
             # Table Frame
-            table_frame = ttk.LabelFrame(self.root, text="Danh Sach Tiến Trinh & Ket Qua Mô Phỏng")
+            table_frame = ttk.LabelFrame(self.root, text="Danh Sách Tiến Trình & Kết Quả Mô Phỏng")
             table_frame.pack(fill="both", expand=True, padx=15, pady=5)
             
-            cols = ("PID", "AT", "BT", "ST", "FT", "TAT", "WT", "RT")
+            cols = ("Process ID", "Arrival Time", "Burst Time", "Start Time", "Finish Time", "Turnaround Time", "Waiting Time", "Response Time")
             self.tree = ttk.Treeview(table_frame, columns=cols, show="headings")
             for col in cols:
                 self.tree.heading(col, text=col)
@@ -74,14 +74,14 @@ def launch_gui():
             btn_run = ttk.Button(ctrl_frame, text="Chạy Mô Phỏng", command=self.run_simulation)
             btn_run.pack(side="left", padx=15)
             
-            btn_import = ttk.Button(ctrl_frame, text="Nap File CSV", command=self.import_csv)
+            btn_import = ttk.Button(ctrl_frame, text="import File CSV", command=self.import_csv)
             btn_import.pack(side="right", padx=5)
             
-            btn_export = ttk.Button(ctrl_frame, text="Xuat Kết Quả CSV", command=self.export_csv)
+            btn_export = ttk.Button(ctrl_frame, text="export file CSV", command=self.export_csv)
             btn_export.pack(side="right", padx=5)
             
             # Status Bar
-            self.status_label = ttk.Label(self.root, text="Sẵn sàng nhập dữ liệu...", font=("Arial", 10, "italic"))
+            self.status_label = ttk.Label(self.root, text="Sẵn sàng import...", font=("Arial", 10, "italic"))
             self.status_label.pack(side="bottom", fill="x", padx=15, pady=5)
 
         def add_process(self):
@@ -90,17 +90,17 @@ def launch_gui():
             bt_str = self.entry_bt.get().strip()
             
             if not pid or not at_str or not bt_str:
-                messagebox.showerror("Lỗi Nhập Liệu", "Vui lòng nhập đầy đủ PID, AT và BT!")
+                messagebox.showerror("Cần nhập đầy đủ PID, AT và BT!")
                 return
             try:
                 at = int(at_str)
                 bt = int(bt_str)
             except ValueError:
-                messagebox.showerror("Lỗi Nhập Liệu", "AT và BT phải là số nguyên!")
+                messagebox.showerror("AT và BT phải là số nguyên!")
                 return
                 
             if at < 0 or bt <= 0:
-                messagebox.showerror("Lỗi Nhập Liệu", "Ràng buộc: AT >= 0 và BT > 0!")
+                messagebox.showerror("Lỗi", "AT >= 0 và BT > 0!")
                 return
                 
             p = Process(pid, at, bt)
@@ -120,7 +120,7 @@ def launch_gui():
 
         def run_simulation(self):
             if not self.processes:
-                messagebox.showwarning("Cảnh Báo", "Danh sách tiến trình rỗng!")
+                messagebox.showwarning("Danh sách tiến trình rỗng!")
                 return
                 
             algo = self.algo_var.get()
@@ -152,13 +152,13 @@ def launch_gui():
                     self.processes = procs
                     for p in procs:
                         self.tree.insert("", "end", values=(p.pid, p.at, p.bt, "-", "-", "-", "-", "-"))
-                    self.status_label.config(text=f"Đã nạp {len(procs)} tiến trình từ {os.path.basename(path)}")
+                    self.status_label.config(text=f"Đã import {len(procs)} tiến trình từ {os.path.basename(path)}")
                 except Exception as e:
-                    messagebox.showerror("Lỗi Nạp File", str(e))
+                    messagebox.showerror("Lỗi Import File", str(e))
 
         def export_csv(self):
             if not self.processes:
-                messagebox.showwarning("Cảnh Báo", "Không có dữ liệu để xuất!")
+                messagebox.showwarning("Không có dữ liệu để xuất!")
                 return
             path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV Files", "*.csv")])
             if path:
@@ -169,9 +169,9 @@ def launch_gui():
                     else:
                         res, gantt = SchedulerEngine.run_sjf_non_preemptive(self.processes)
                     CSVHandler.write_output_csv(path, res, gantt, algo)
-                    messagebox.showinfo("Thành Công", f"Đã xuất kết quả ra file {os.path.basename(path)}")
+                    messagebox.showinfo("Thành Công", f"Đã export kết quả ra file {os.path.basename(path)}")
                 except Exception as e:
-                    messagebox.showerror("Lỗi Xuất File", str(e))
+                    messagebox.showerror("Lỗi export File", str(e))
 
     root = tk.Tk()
     app = SchedulerGUIApp(root)
