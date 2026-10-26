@@ -193,29 +193,36 @@ Trạng thái: BLOCKED (chờ code)
 
 File đầu vào: data/equal_burst.csv
 
-```csv
+​```csv
 PID,ArrivalTime,BurstTime
-P1,0,3
-P2,1,3
-P3,2,3
-```
+P1,0,4
+P2,0,2
+P3,0,2
+​```
 
-Ghi chú: tại thời điểm 3, P2 và P3 đã đến và có BT bằng nhau, SJF chọn P2 vì AT nhỏ hơn.
+Ghi chú: P2 và P3 có BT bằng nhau (đều bằng 2), phá hòa theo PID nên P2 chạy trước P3.
 
-### FCFS và SJF không độc quyền (kết quả giống nhau)
+### FCFS
 
 Thứ tự chạy: P1 -> P2 -> P3
 
 | PID | ST | CT | TAT | WT | RT |
 |---|---:|---:|---:|---:|---:|
-| P1 | 0 | 3 | 3 | 0 | 0 |
-| P2 | 3 | 6 | 5 | 2 | 2 |
-| P3 | 6 | 9 | 7 | 4 | 4 |
+| P1 | 0 | 4 | 4 | 0 | 0 |
+| P2 | 4 | 6 | 6 | 4 | 4 |
+| P3 | 6 | 8 | 8 | 6 | 6 |
+
+### SJF không độc quyền
+
+Thứ tự chạy: P2 -> P3 -> P1
+
+| PID | ST | CT | TAT | WT | RT |
+|---|---:|---:|---:|---:|---:|
+| P1 | 4 | 8 | 8 | 4 | 4 |
+| P2 | 0 | 2 | 2 | 0 | 0 |
+| P3 | 2 | 4 | 4 | 2 | 2 |
 
 Trạng thái: BLOCKED (chờ code)
-
----
-
 ## TC07 - Tiến trình đến khi CPU đang bận
 
 File đầu vào: data/process_during_busy.csv
