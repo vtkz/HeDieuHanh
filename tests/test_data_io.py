@@ -181,5 +181,56 @@ class TestDataIO(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "khong co tien trinh"):
             read_processes_csv(self.input_file)
 
+    def test_reject_missing_input_file(self):
+        missing_file = self.folder / "missing.csv"
+
+        with self.assertRaisesRegex(FileNotFoundError, "Khong tim thay file CSV"):
+            read_processes_csv(missing_file)
+
+    def test_reject_empty_arrival_time(self):
+        self.write_csv(
+            "ProcessID,ArrivalTime,BurstTime\n"
+            "P1,,5\n"
+        )
+
+        with self.assertRaisesRegex(ValueError, "so nguyen"):
+            read_processes_csv(self.input_file)
+
+    def test_skip_blank_rows(self):
+        self.write_csv(
+            "ProcessID,ArrivalTime,BurstTime\n"
+            "P1,0,5\n"
+            ",,\n"
+            "P2,1,3\n"
+        )
+
+        result = read_processes_csv(self.input_file)
+
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0]["ProcessID"], "P1")
+        self.assertEqual(result[1]["ProcessID"], "P2")
+
+    def test_export_process_object(self):
+        class FakeProcess:
+            pid = "P1"
+            at = 0
+            bt = 5
+            st = 0
+            ft = 5
+            tat = 5
+            wt = 0
+            rt = 0
+
+        output_file = self.folder / "object_results.csv"
+
+        export_results_csv([FakeProcess()], output_file)
+
+        with open(output_file, encoding="utf-8-sig", newline="") as file:
+            rows = list(csv.DictReader(file))
+
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["ProcessID"], "P1")
+        self.assertEqual(rows[0]["CompletionTime"], "5")
+
 if __name__ == "__main__":
     unittest.main()
