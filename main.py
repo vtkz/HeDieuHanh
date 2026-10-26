@@ -83,3 +83,53 @@ class SchedulerEngine:
         return completed, gantt_chart
 
 class CSVHandler:
+    @staticmethod
+    def read_input_csv(filepath):
+        processes = []
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(f"File {filepath} không tồn tại!")
+            
+        with open(filepath, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row_idx, row in enumerate(reader, start=1):
+                if not row.get('PID') or not row.get('Arrival_Time') or not row.get('Burst_Time'):
+                    continue
+                pid = row['PID'].strip()
+                try:
+                    at = int(row['Arrival_Time'].strip())
+                    bt = int(row['Burst_Time'].strip())
+                except ValueError:
+                    raise ValueError(f"Dòng {row_idx}: AT và BT phải là số nguyên!")
+                    
+                if at < 0:
+                    raise ValueError(f"Dòng {row_idx} ({pid}): Arrival Time phải >= 0!")
+                if bt <= 0:
+                    raise ValueError(f"Dòng {row_idx} ({pid}): Burst Time phải > 0!")
+                processes.append(Process(pid, at, bt))
+        return processes
+
+    @staticmethod
+    def write_output_csv(filepath, processes, gantt_chart, algo_name):
+        with open(filepath, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow([f"=== SCHEDULING REPORT: {algo_name} ==="])
+            writer.writerow(["PID", "Arrival_Time", "Burst_Time", "Start_Time", "Finish_Time", "Turnaround_Time", "Waiting_Time", "Response_Time"])
+            
+            tot_tat, tot_wt, tot_rt = 0, 0, 0
+            for p in processes:
+                writer.writerow([p.pid, p.at, p.bt, p.st, p.ft, p.tat, p.wt, p.rt])
+                tot_tat += p.tat
+                tot_wt += p.wt
+                tot_rt += p.rt
+                
+            n = len(processes) if processes else 1
+            writer.writerow([])
+            writer.writerow(["SUMMARY METRICS"])
+            writer.writerow(["Average Turnaround Time (Avg TAT)", f"{tot_tat / n:.2f}"])
+            writer.writerow(["Average Waiting Time (Avg WT)", f"{tot_wt / n:.2f}"])
+            writer.writerow(["Average Response Time (Avg RT)", f"{tot_rt / n:.2f}"])
+            writer.writerow([])
+            writer.writerow(["GANTT CHART TRACE LOG"])
+            writer.writerow(["Task_PID", "Start_Time", "Finish_Time", "Duration"])
+            for pid, st, ft in gantt_chart:
+                writer.writerow([pid, st, ft, ft - st])
