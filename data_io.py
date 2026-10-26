@@ -80,6 +80,7 @@ def read_processes_csv(file_path=DEFAULT_INPUT_FILE):
 
     return processes
 
+
 def export_results_csv(results, file_path=None):
     if file_path is None:
         file_path = PROJECT_DIR / "output" / "simulation_results.csv"
@@ -89,13 +90,35 @@ def export_results_csv(results, file_path=None):
     if not results:
         raise ValueError("Khong co ket qua de xuat.")
 
-    fieldnames = list(results[0].keys())
+    rows = []
+
+    for result in results:
+        if isinstance(result, dict):
+            rows.append(result)
+        else:
+            rows.append({
+                "ProcessID": result.pid,
+                "ArrivalTime": result.at,
+                "BurstTime": result.bt,
+                "StartTime": result.st,
+                "CompletionTime": result.ft,
+                "TurnaroundTime": result.tat,
+                "WaitingTime": result.wt,
+                "ResponseTime": result.rt
+            })
+
+    fieldnames = list(rows[0].keys())
+
+    for row in rows:
+        if list(row.keys()) != fieldnames:
+            raise ValueError("Cac dong ket qua khong cung cau truc.")
+
     file_path.parent.mkdir(parents=True, exist_ok=True)
 
     with open(file_path, "w", encoding="utf-8-sig", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(results)
+        writer.writerows(rows)
 
     return file_path
 
