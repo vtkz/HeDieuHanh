@@ -181,7 +181,7 @@ Cập nhật sau mỗi lần chạy. Trạng thái: PASS, FAIL hoặc BLOCKED.
 | BUG02 | TC08, TC10 | Thiếu cột hoặc PID trống: code `continue` bỏ qua dòng thay vì báo lỗi (spec mục 9 yêu cầu từ chối); lỗi này còn nguyên kể cả khi sửa tên cột | Cao | TV1 | Mở | |
 | BUG03 | TC03 | Không kiểm tra PID trùng (spec mục 9) | Trung bình | TV1 | Mở | |
 
-## 15. Kết quả Unit Test FCFS (Tuần 3)
+## 15. Kết quả Unit Test FCFS
 
 File test: `tests/test_fcfs.py`
 Lệnh chạy: `python -m unittest discover -s tests -v`
