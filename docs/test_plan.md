@@ -184,7 +184,9 @@ Cập nhật sau mỗi lần chạy. Trạng thái: PASS, FAIL hoặc BLOCKED.
 ## 15. Kết quả Unit Test FCFS
 
 File test: `tests/test_fcfs.py`
+
 Lệnh chạy: `python -m unittest discover -s tests -v`
+
 Tổng: 12 test, 8 PASS, 4 FAIL.
 
 | Test | Nội dung | Kết quả mong đợi | Kết quả thực tế | Trạng thái |
