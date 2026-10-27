@@ -157,19 +157,19 @@ Cập nhật sau mỗi lần chạy. Trạng thái: PASS, FAIL hoặc BLOCKED.
 
 | Mã TC | Dữ liệu vào | Thuật toán | Kết quả mong đợi (tóm tắt) | Kết quả thực tế | Trạng thái | Người chạy | Ngày | Ghi chú |
 |---|---|---|---|---|---|---|---|---|
-| TC01 | normal.csv | FCFS | P1 -> P2 -> P3 -> P4 | | BLOCKED | | | Chờ code |
+| TC01 | normal.csv | FCFS | P1 -> P2 -> P3 -> P4 | Khớp bảng TC01 | PASS | TV5 | 27/10/2026 | Unit test |
 | TC01 | normal.csv | SJF | P1 -> P3 -> P2 -> P4 | | BLOCKED | | | Chờ code |
-| TC02 | cpu_idle.csv | FCFS, SJF | P1 -> P2; Idle 0-2 và 5-8 | | BLOCKED | | | Chờ code |
-| TC03 | invalid_data.csv | Đọc CSV | Từ chối, báo 3 lỗi, không crash | | BLOCKED | | | Chờ code |
-| TC04 | same_arrival.csv | FCFS | P1 -> P2 -> P3 | | BLOCKED | | | Chờ code |
+| TC02 | cpu_idle.csv | FCFS, SJF | P1 -> P2; Idle 0-2 và 5-8 | FCFS khớp; SJF chưa chạy | FCFS: PASS; SJF: BLOCKED | TV5 | 27/10/2026 | Chờ SJF |
+| TC03 | invalid_data.csv | Đọc CSV | Từ chối, báo 3 lỗi, không crash | Không báo lỗi | FAIL | TV5 | 27/10/2026 | BUG01, BUG03 |
+| TC04 | same_arrival.csv | FCFS | P1 -> P2 -> P3 | Khớp bảng TC04 | PASS | TV5 | 27/10/2026 | Unit test |
 | TC04 | same_arrival.csv | SJF | P2 -> P3 -> P1 | | BLOCKED | | | Chờ code |
 | TC05 | single_process.csv | FCFS, SJF | P1; CT = 5, TAT = 5, WT = 0, RT = 0 | | BLOCKED | | | Chờ code |
-| TC06 | equal_burst.csv | FCFS, SJF | P1 -> P2 -> P3 | | BLOCKED | | | Chờ code |
+| TC06 | equal_burst.csv | FCFS, SJF | FCFS: P1 -> P2 -> P3; SJF: P2 -> P3 -> P1 | | BLOCKED | | | Chờ code |
 | TC07 | process_during_busy.csv | FCFS | P1 -> P2 -> P3 | | BLOCKED | | | Chờ code |
 | TC07 | process_during_busy.csv | SJF | P1 -> P3 -> P2 | | BLOCKED | | | Chờ code |
-| TC08 | missing_column.csv | Đọc CSV | Báo thiếu cột BurstTime | | BLOCKED | | | Chờ code |
-| TC09 | non_numeric.csv | Đọc CSV | Báo AT không phải số | | BLOCKED | | | Chờ code |
-| TC10 | empty_pid.csv | Đọc CSV | Báo PID trống | | BLOCKED | | | Chờ code |
+| TC08 | missing_column.csv | Đọc CSV | Báo thiếu cột BurstTime | Không báo lỗi | FAIL | TV5 | 27/10/2026 | BUG02 |
+| TC09 | non_numeric.csv | Đọc CSV | Báo AT không phải số | Không báo lỗi | FAIL | TV5 | 27/10/2026 | BUG01 |
+| TC10 | empty_pid.csv | Đọc CSV | Báo PID trống | Không báo lỗi | FAIL | TV5 | 27/10/2026 | BUG02 |
 | TC11 | header_only.csv | Đọc CSV | Báo không có tiến trình | | BLOCKED | | | Chờ code |
 | TC12 | perf_*.csv | FCFS, SJF | Hoàn thành, ghi thời gian | | BLOCKED | | | Chờ code và dữ liệu |
 
@@ -177,4 +177,26 @@ Cập nhật sau mỗi lần chạy. Trạng thái: PASS, FAIL hoặc BLOCKED.
 
 | Mã lỗi | Test case | Mô tả lỗi | Mức độ | Người phụ trách sửa | Trạng thái | Kết quả kiểm tra lại |
 |---|---|---|---|---|---|---|
-| | | | | | | |
+| BUG01 | TC03, TC09 | CSVHandler đọc cột `Arrival_Time` và `Burst_Time`, trong khi spec dùng `ArrivalTime` và `BurstTime`; file CSV theo spec bị bỏ qua mọi dòng mà không báo lỗi | Cao | TV1 | Mở | |
+| BUG02 | TC08, TC10 | Thiếu cột hoặc PID trống: code `continue` bỏ qua dòng thay vì báo lỗi (spec mục 9 yêu cầu từ chối); lỗi này còn nguyên kể cả khi sửa tên cột | Cao | TV1 | Mở | |
+| BUG03 | TC03 | Không kiểm tra PID trùng (spec mục 9) | Trung bình | TV1 | Mở | |
+
+## 15. Kết quả Unit Test FCFS (Tuần 3)
+
+File test: `tests/test_fcfs.py`
+Lệnh chạy: `python -m unittest discover -s tests -v`
+Tổng: 12 test, 8 PASS, 4 FAIL.
+
+| Test | Nội dung | Kết quả mong đợi | Kết quả thực tế | Trạng thái |
+|---|---|---|---|---|
+| test_tc01_du_lieu_thong_thuong | normal.csv | Khớp bảng TC01 | Khớp | PASS |
+| test_tc02_cpu_idle | cpu_idle.csv | Khớp TC02, Idle 0-2 và 5-8 | Khớp | PASS |
+| test_tc04_tien_trinh_den_cung_luc | same_arrival.csv | Khớp bảng TC04 | Khớp | PASS |
+| test_oracle_Test1_Basic | Oracle của TV2 | Khớp oracle | Khớp | PASS |
+| test_oracle_Test2_Idle | Oracle của TV2 | Khớp oracle | Khớp | PASS |
+| test_tc03_at_am_bt_bang_0_pid_trung | invalid_data.csv | Báo lỗi ValueError | Không báo lỗi | FAIL (BUG01, BUG03) |
+| test_tc08_thieu_cot | missing_column.csv | Báo lỗi ValueError | Không báo lỗi | FAIL (BUG02) |
+| test_tc09_at_khong_phai_so | non_numeric.csv | Báo lỗi ValueError | Không báo lỗi | FAIL (BUG01) |
+| test_tc10_pid_trong | empty_pid.csv | Báo lỗi ValueError | Không báo lỗi | FAIL (BUG02) |
+
+Các test oracle chạy 2 lần (đầu vào giữ nguyên và đảo ngược thứ tự), cả hai đều đạt.
