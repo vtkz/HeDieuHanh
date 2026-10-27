@@ -36,7 +36,7 @@ thực tế trên CPU. Đây là chương trình mô phỏng thuật toán lập
 ## 4. Mô hình dữ liệu
 
 Đầu vào của mỗi tiến trình:
-- PID: mã tiến trình.
+- ProcessID: mã tiến trình.
 - ArrivalTime (AT): thời điểm tiến trình đến.
 - BurstTime (BT): thời gian CPU cần để chạy.
 
@@ -60,7 +60,7 @@ RT = ST - AT
 - Mỗi tiến trình có một đợt sử dụng CPU.
 - AT là số nguyên không âm.
 - BT là số nguyên dương.
-- PID không được trùng.
+- ProcessID không được trùng.
 - Tiến trình đang chạy không bị ngắt giữa chừng.
 - CPU ở trạng thái Idle khi chưa có tiến trình sẵn sàng.
 
@@ -68,14 +68,14 @@ RT = ST - AT
 
 FCFS:
 1. AT tăng dần.
-2. Nếu AT bằng nhau, PID tăng dần.
+2. Nếu AT bằng nhau, ProcessID tăng dần.
 3. Nếu vẫn bằng nhau, giữ thứ tự đầu vào.
 
 SJF không độc quyền:
 1. Chỉ xét tiến trình đã đến và chưa chạy.
 2. Chọn BT nhỏ nhất.
 3. Nếu BT bằng nhau, AT nhỏ hơn được chọn trước.
-4. Nếu vẫn bằng nhau, PID tăng dần.
+4. Nếu vẫn bằng nhau, ProcessID tăng dần.
 5. Nếu CPU không có tiến trình sẵn sàng, ghi nhận khoảng Idle.
 
 Các quy tắc phá hòa phải được nhóm xác nhận và áp dụng nhất quán
@@ -84,10 +84,10 @@ trong code, kiểm thử và báo cáo.
 ## 8. Định dạng CSV đầu vào
 
 Tên cột:
-PID,ArrivalTime,BurstTime
+ProcessID,ArrivalTime,BurstTime
 
 Ví dụ:
-PID,ArrivalTime,BurstTime
+ProcessID,ArrivalTime,BurstTime
 P1,0,5
 P2,1,3
 P3,2,2
@@ -95,7 +95,7 @@ P4,4,4
 
 ## 9. Kiểm tra dữ liệu
 
-- Từ chối PID trống hoặc trùng.
+- Từ chối ProcessID trống hoặc trùng.
 - Từ chối AT âm.
 - Từ chối BT bằng 0 hoặc âm.
 - Báo lỗi nếu thiếu cột hoặc dữ liệu không hợp lệ.
@@ -110,7 +110,7 @@ Cần có các trường hợp:
 - Nhiều tiến trình có BT bằng nhau.
 - CPU rỗi.
 - Tiến trình đến khi CPU đang bận.
-- Dữ liệu âm, bằng 0, PID trùng hoặc CSV sai định dạng.
+- Dữ liệu âm, bằng 0, ProcessID trùng hoặc CSV sai định dạng.
 
 Kết quả chương trình phải được so sánh với kết quả tính tay hoặc
 nguồn lý thuyết phù hợp.

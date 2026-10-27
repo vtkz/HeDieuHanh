@@ -33,12 +33,12 @@ Ngoài phạm vi:
 
 ## 4. Quy tắc kiểm thử
 
-- PID không được trống hoặc trùng.
+- ProcessID không được trống hoặc trùng.
 - AT phải là số nguyên không âm.
 - BT phải là số nguyên dương.
-- FCFS ưu tiên AT nhỏ hơn; nếu bằng nhau thì PID tăng dần.
+- FCFS ưu tiên AT nhỏ hơn; nếu bằng nhau thì ProcessID tăng dần.
 - SJF chọn tiến trình đã đến có BT nhỏ nhất.
-- Nếu BT bằng nhau, ưu tiên AT nhỏ hơn rồi PID tăng dần.
+- Nếu BT bằng nhau, ưu tiên AT nhỏ hơn rồi ProcessID tăng dần.
 - Tiến trình đang chạy không bị ngắt.
 - Nếu chưa có tiến trình sẵn sàng, CPU ở trạng thái Idle.
 
@@ -48,18 +48,18 @@ Ngoài phạm vi:
 |---|---|---|
 | data/normal.csv | Dữ liệu thông thường, 4 tiến trình | TC01 |
 | data/cpu_idle.csv | CPU rỗi lúc bắt đầu và giữa các tiến trình | TC02 |
-| data/invalid_data.csv | AT âm, BT bằng 0, PID trùng | TC03 |
+| data/invalid_data.csv | AT âm, BT bằng 0, ProcessID trùng | TC03 |
 | data/same_arrival.csv | Các tiến trình đến cùng lúc | TC04 |
 | data/single_process.csv | Chỉ một tiến trình | TC05 |
 | data/equal_burst.csv | BT bằng nhau, AT khác nhau | TC06 |
 | data/process_during_busy.csv | Tiến trình đến khi CPU đang bận | TC07 |
 | data/missing_column.csv | CSV thiếu cột BurstTime | TC08 |
 | data/non_numeric.csv | AT không phải số | TC09 |
-| data/empty_pid.csv | PID trống | TC10 |
+| data/empty_pid.csv | ProcessID trống | TC10 |
 | data/header_only.csv | Chỉ có dòng tiêu đề | TC11 |
 | data/perf_10.csv, perf_100.csv, perf_1000.csv, perf_5000.csv | Đo hiệu năng (sinh bằng script với seed cố định, tạo khi có code) | TC12 |
 
-Yêu cầu định dạng file: dòng đầu tiên phải là dòng tiêu đề `PID,ArrivalTime,BurstTime`, không có dòng trống ở đầu file.
+Yêu cầu định dạng file: dòng đầu tiên phải là dòng tiêu đề `ProcessID,ArrivalTime,BurstTime`, không có dòng trống ở đầu file.
 
 ## 6. Danh sách test case
 
@@ -69,14 +69,14 @@ Chi tiết dữ liệu, kết quả mong đợi và bảng số liệu nằm tro
 |---|---|---|
 | TC01 | Dữ liệu thông thường | Kết quả đúng tính tay |
 | TC02 | CPU rỗi lúc bắt đầu và giữa các tiến trình | Ghi nhận đúng các khoảng Idle (0-2 và 5-8) |
-| TC03 | AT âm, BT bằng 0, PID trùng | Báo lỗi, không crash |
+| TC03 | AT âm, BT bằng 0, ProcessID trùng | Báo lỗi, không crash |
 | TC04 | Các tiến trình đến cùng lúc | Đúng quy tắc phá hòa |
 | TC05 | Một tiến trình | Các chỉ số thời gian chính xác |
-| TC06 | Các tiến trình có BT bằng nhau | SJF chọn đúng tiến trình theo AT rồi PID |
+| TC06 | Các tiến trình có BT bằng nhau | SJF chọn đúng tiến trình theo AT rồi ProcessID |
 | TC07 | Tiến trình đến khi CPU bận | Không ngắt tiến trình đang chạy |
 | TC08 | CSV thiếu cột | Báo lỗi thiếu cột, không crash |
 | TC09 | AT hoặc BT không phải số | Báo lỗi, không crash |
-| TC10 | PID trống | Báo lỗi, không crash |
+| TC10 | ProcessID trống | Báo lỗi, không crash |
 | TC11 | CSV chỉ có tiêu đề | Báo lỗi hoặc cảnh báo, không crash |
 | TC12 | Nhiều tiến trình | Hoàn thành và ghi nhận thời gian chạy |
 
@@ -169,7 +169,7 @@ Cập nhật sau mỗi lần chạy. Trạng thái: PASS, FAIL hoặc BLOCKED.
 | TC07 | process_during_busy.csv | SJF | P1 -> P3 -> P2 | | BLOCKED | | | Chờ code |
 | TC08 | missing_column.csv | Đọc CSV | Báo thiếu cột BurstTime | Không báo lỗi | FAIL | TV5 | 27/10/2026 | BUG02 |
 | TC09 | non_numeric.csv | Đọc CSV | Báo AT không phải số | Không báo lỗi | FAIL | TV5 | 27/10/2026 | BUG01 |
-| TC10 | empty_pid.csv | Đọc CSV | Báo PID trống | Không báo lỗi | FAIL | TV5 | 27/10/2026 | BUG02 |
+| TC10 | empty_pid.csv | Đọc CSV | Báo ProcessID trống | Không báo lỗi | FAIL | TV5 | 27/10/2026 | BUG02 |
 | TC11 | header_only.csv | Đọc CSV | Báo không có tiến trình | | BLOCKED | | | Chờ code |
 | TC12 | perf_*.csv | FCFS, SJF | Hoàn thành, ghi thời gian | | BLOCKED | | | Chờ code và dữ liệu |
 
@@ -178,8 +178,8 @@ Cập nhật sau mỗi lần chạy. Trạng thái: PASS, FAIL hoặc BLOCKED.
 | Mã lỗi | Test case | Mô tả lỗi | Mức độ | Người phụ trách sửa | Trạng thái | Kết quả kiểm tra lại |
 |---|---|---|---|---|---|---|
 | BUG01 | TC03, TC09 | CSVHandler đọc cột `Arrival_Time` và `Burst_Time`, trong khi spec dùng `ArrivalTime` và `BurstTime`; file CSV theo spec bị bỏ qua mọi dòng mà không báo lỗi | Cao | TV1 | Mở | |
-| BUG02 | TC08, TC10 | Thiếu cột hoặc PID trống: code `continue` bỏ qua dòng thay vì báo lỗi (spec mục 9 yêu cầu từ chối); lỗi này còn nguyên kể cả khi sửa tên cột | Cao | TV1 | Mở | |
-| BUG03 | TC03 | Không kiểm tra PID trùng (spec mục 9) | Trung bình | TV1 | Mở | |
+| BUG02 | TC08, TC10 | Thiếu cột hoặc ProcessID trống: code `continue` bỏ qua dòng thay vì báo lỗi (spec mục 9 yêu cầu từ chối); lỗi này còn nguyên kể cả khi sửa tên cột | Cao | TV1 | Mở | |
+| BUG03 | TC03 | Không kiểm tra ProcessID trùng (spec mục 9) | Trung bình | TV1 | Mở | |
 
 ## 15. Kết quả Unit Test FCFS
 

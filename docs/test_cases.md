@@ -3,9 +3,9 @@
 ## Quy ước chung
 
 - Công thức theo `spec.md`: CT = ST + BT; TAT = CT - AT; WT = TAT - BT; RT = ST - AT.
-- FCFS: AT tăng dần; nếu AT bằng nhau thì PID tăng dần.
-- SJF không độc quyền (theo `spec.md`, tiến trình đang chạy không bị ngắt): chọn tiến trình đã đến có BT nhỏ nhất; nếu bằng nhau thì AT nhỏ hơn, rồi PID tăng dần.
-- Các bảng kết quả sắp xếp theo PID để dễ đối chiếu. Thứ tự chạy được ghi riêng ở dòng "Thứ tự chạy".
+- FCFS: AT tăng dần; nếu AT bằng nhau thì ProcessID tăng dần.
+- SJF không độc quyền (theo `spec.md`, tiến trình đang chạy không bị ngắt): chọn tiến trình đã đến có BT nhỏ nhất; nếu bằng nhau thì AT nhỏ hơn, rồi ProcessID tăng dần.
+- Các bảng kết quả sắp xếp theo ProcessID để dễ đối chiếu. Thứ tự chạy được ghi riêng ở dòng "Thứ tự chạy".
 
 ## Tiêu chí đánh giá
 
@@ -21,14 +21,14 @@ Chưa ghi PASS cho các trường hợp chưa chạy chương trình.
 |---|---|---|
 | TC01 | Dữ liệu thông thường | data/normal.csv |
 | TC02 | CPU Idle | data/cpu_idle.csv |
-| TC03 | Dữ liệu không hợp lệ (AT âm, BT = 0, PID trùng) | data/invalid_data.csv |
+| TC03 | Dữ liệu không hợp lệ (AT âm, BT = 0, ProcessID trùng) | data/invalid_data.csv |
 | TC04 | Nhiều tiến trình đến cùng lúc | data/same_arrival.csv |
 | TC05 | Chỉ có một tiến trình | data/single_process.csv |
 | TC06 | Nhiều tiến trình có BurstTime bằng nhau | data/equal_burst.csv |
 | TC07 | Tiến trình đến khi CPU đang bận | data/process_during_busy.csv |
 | TC08 | CSV thiếu cột | data/missing_column.csv |
 | TC09 | AT hoặc BT không phải số | data/non_numeric.csv |
-| TC10 | PID trống | data/empty_pid.csv |
+| TC10 | ProcessID trống | data/empty_pid.csv |
 | TC11 | CSV chỉ có dòng tiêu đề | data/header_only.csv |
 | TC12 | Hiệu năng với nhiều tiến trình | Xem `test_plan.md`, mục 8 |
 
@@ -39,7 +39,7 @@ Chưa ghi PASS cho các trường hợp chưa chạy chương trình.
 File đầu vào: data/normal.csv
 
 ```csv
-PID,ArrivalTime,BurstTime
+ProcessID,ArrivalTime,BurstTime
 P1,0,5
 P2,1,3
 P3,2,2
@@ -50,7 +50,7 @@ P4,4,4
 
 Thứ tự chạy: P1 -> P2 -> P3 -> P4
 
-| PID | ST | CT | TAT | WT | RT |
+| ProcessID | ST | CT | TAT | WT | RT |
 |---|---:|---:|---:|---:|---:|
 | P1 | 0 | 5 | 5 | 0 | 0 |
 | P2 | 5 | 8 | 7 | 4 | 4 |
@@ -61,7 +61,7 @@ Thứ tự chạy: P1 -> P2 -> P3 -> P4
 
 Thứ tự chạy: P1 -> P3 -> P2 -> P4
 
-| PID | ST | CT | TAT | WT | RT |
+| ProcessID | ST | CT | TAT | WT | RT |
 |---|---:|---:|---:|---:|---:|
 | P1 | 0 | 5 | 5 | 0 | 0 |
 | P2 | 7 | 10 | 9 | 6 | 6 |
@@ -77,7 +77,7 @@ Trạng thái: BLOCKED (chờ code)
 File đầu vào: data/cpu_idle.csv
 
 ```csv
-PID,ArrivalTime,BurstTime
+ProcessID,ArrivalTime,BurstTime
 P1,2,3
 P2,8,2
 ```
@@ -86,7 +86,7 @@ P2,8,2
 
 Thứ tự chạy: P1 -> P2
 
-| PID | ST | CT | TAT | WT | RT |
+| ProcessID | ST | CT | TAT | WT | RT |
 |---|---:|---:|---:|---:|---:|
 | P1 | 2 | 5 | 3 | 0 | 0 |
 | P2 | 8 | 10 | 2 | 0 | 0 |
@@ -108,7 +108,7 @@ Trạng thái: BLOCKED (chờ code)
 File đầu vào: data/invalid_data.csv
 
 ```csv
-PID,ArrivalTime,BurstTime
+ProcessID,ArrivalTime,BurstTime
 P1,0,5
 P2,-1,3
 P3,2,0
@@ -118,7 +118,7 @@ P1,4,2
 Các lỗi cần phát hiện:
 - P2 có ArrivalTime = -1.
 - P3 có BurstTime = 0.
-- PID P1 bị trùng.
+- ProcessID P1 bị trùng.
 
 Kết quả mong đợi:
 - Dữ liệu bị từ chối, không chạy thuật toán.
@@ -134,21 +134,21 @@ Trạng thái: BLOCKED (chờ code)
 File đầu vào: data/same_arrival.csv
 
 ```csv
-PID,ArrivalTime,BurstTime
+ProcessID,ArrivalTime,BurstTime
 P1,0,4
 P2,0,2
 P3,0,2
 ```
 
 Ghi chú:
-- FCFS: AT bằng nhau nên chọn theo PID tăng dần.
-- SJF: P2 và P3 có BT nhỏ hơn P1 nên chạy trước; P2 và P3 bằng BT nên P2 chạy trước theo PID.
+- FCFS: AT bằng nhau nên chọn theo ProcessID tăng dần.
+- SJF: P2 và P3 có BT nhỏ hơn P1 nên chạy trước; P2 và P3 bằng BT nên P2 chạy trước theo ProcessID.
 
 ### FCFS
 
 Thứ tự chạy: P1 -> P2 -> P3
 
-| PID | ST | CT | TAT | WT | RT |
+| ProcessID | ST | CT | TAT | WT | RT |
 |---|---:|---:|---:|---:|---:|
 | P1 | 0 | 4 | 4 | 0 | 0 |
 | P2 | 4 | 6 | 6 | 4 | 4 |
@@ -158,7 +158,7 @@ Thứ tự chạy: P1 -> P2 -> P3
 
 Thứ tự chạy: P2 -> P3 -> P1
 
-| PID | ST | CT | TAT | WT | RT |
+| ProcessID | ST | CT | TAT | WT | RT |
 |---|---:|---:|---:|---:|---:|
 | P1 | 4 | 8 | 8 | 4 | 4 |
 | P2 | 0 | 2 | 2 | 0 | 0 |
@@ -173,7 +173,7 @@ Trạng thái: BLOCKED (chờ code)
 File đầu vào: data/single_process.csv
 
 ```csv
-PID,ArrivalTime,BurstTime
+ProcessID,ArrivalTime,BurstTime
 P1,0,5
 ```
 
@@ -181,7 +181,7 @@ P1,0,5
 
 Thứ tự chạy: P1
 
-| PID | ST | CT | TAT | WT | RT |
+| ProcessID | ST | CT | TAT | WT | RT |
 |---|---:|---:|---:|---:|---:|
 | P1 | 0 | 5 | 5 | 0 | 0 |
 
@@ -194,19 +194,19 @@ Trạng thái: BLOCKED (chờ code)
 File đầu vào: data/equal_burst.csv
 
 ​```csv
-PID,ArrivalTime,BurstTime
+ProcessID,ArrivalTime,BurstTime
 P1,0,4
 P2,0,2
 P3,0,2
 ​```
 
-Ghi chú: P2 và P3 có BT bằng nhau (đều bằng 2), phá hòa theo PID nên P2 chạy trước P3.
+Ghi chú: P2 và P3 có BT bằng nhau (đều bằng 2), phá hòa theo ProcessID nên P2 chạy trước P3.
 
 ### FCFS
 
 Thứ tự chạy: P1 -> P2 -> P3
 
-| PID | ST | CT | TAT | WT | RT |
+| ProcessID | ST | CT | TAT | WT | RT |
 |---|---:|---:|---:|---:|---:|
 | P1 | 0 | 4 | 4 | 0 | 0 |
 | P2 | 4 | 6 | 6 | 4 | 4 |
@@ -216,7 +216,7 @@ Thứ tự chạy: P1 -> P2 -> P3
 
 Thứ tự chạy: P2 -> P3 -> P1
 
-| PID | ST | CT | TAT | WT | RT |
+| ProcessID | ST | CT | TAT | WT | RT |
 |---|---:|---:|---:|---:|---:|
 | P1 | 4 | 8 | 8 | 4 | 4 |
 | P2 | 0 | 2 | 2 | 0 | 0 |
@@ -228,7 +228,7 @@ Trạng thái: BLOCKED (chờ code)
 File đầu vào: data/process_during_busy.csv
 
 ```csv
-PID,ArrivalTime,BurstTime
+ProcessID,ArrivalTime,BurstTime
 P1,0,6
 P2,2,2
 P3,3,1
@@ -240,7 +240,7 @@ Ghi chú: P2 và P3 đến khi P1 đang chạy. CPU không ngắt P1. Tại th�
 
 Thứ tự chạy: P1 -> P2 -> P3
 
-| PID | ST | CT | TAT | WT | RT |
+| ProcessID | ST | CT | TAT | WT | RT |
 |---|---:|---:|---:|---:|---:|
 | P1 | 0 | 6 | 6 | 0 | 0 |
 | P2 | 6 | 8 | 6 | 4 | 4 |
@@ -250,7 +250,7 @@ Thứ tự chạy: P1 -> P2 -> P3
 
 Thứ tự chạy: P1 -> P3 -> P2
 
-| PID | ST | CT | TAT | WT | RT |
+| ProcessID | ST | CT | TAT | WT | RT |
 |---|---:|---:|---:|---:|---:|
 | P1 | 0 | 6 | 6 | 0 | 0 |
 | P2 | 7 | 9 | 7 | 5 | 5 |
@@ -265,7 +265,7 @@ Trạng thái: BLOCKED (chờ code)
 File đầu vào: data/missing_column.csv
 
 ```csv
-PID,ArrivalTime
+ProcessID,ArrivalTime
 P1,0
 P2,1
 ```
@@ -283,7 +283,7 @@ Trạng thái: BLOCKED (chờ code)
 File đầu vào: data/non_numeric.csv
 
 ```csv
-PID,ArrivalTime,BurstTime
+ProcessID,ArrivalTime,BurstTime
 P1,0,5
 P2,abc,3
 ```
@@ -296,18 +296,18 @@ Trạng thái: BLOCKED (chờ code)
 
 ---
 
-## TC10 - PID trống
+## TC10 - ProcessID trống
 
 File đầu vào: data/empty_pid.csv
 
 ```csv
-PID,ArrivalTime,BurstTime
+ProcessID,ArrivalTime,BurstTime
 P1,0,5
 ,1,3
 ```
 
 Kết quả mong đợi:
-- Báo lỗi dòng 3 có PID trống.
+- Báo lỗi dòng 3 có ProcessID trống.
 - Không chạy thuật toán, không làm ứng dụng dừng đột ngột.
 
 Trạng thái: BLOCKED (chờ code)
@@ -319,7 +319,7 @@ Trạng thái: BLOCKED (chờ code)
 File đầu vào: data/header_only.csv
 
 ```csv
-PID,ArrivalTime,BurstTime
+ProcessID,ArrivalTime,BurstTime
 ```
 
 Kết quả mong đợi:

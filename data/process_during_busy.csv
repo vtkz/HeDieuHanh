@@ -1,4 +1,4 @@
-PID,ArrivalTime,BurstTime
+ProcessID,ArrivalTime,BurstTime
 P1,0,6
 P2,2,2
 P3,3,1

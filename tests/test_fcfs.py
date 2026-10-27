@@ -34,13 +34,13 @@ ORACLE_CANDIDATES = [
 
 # ---------------------------------------------------------------- tiện ích
 def doc_csv_theo_spec(duong_dan):
-    """Đọc file CSV theo đúng định dạng spec (PID,ArrivalTime,BurstTime).
+    """Đọc file CSV theo đúng định dạng spec (ProcessID,ArrivalTime,BurstTime).
     Dùng riêng cho test, không phụ thuộc CSVHandler để test FCFS độc lập."""
     tien_trinh = []
     with open(duong_dan, newline="", encoding="utf-8") as f:
         for dong in csv.DictReader(f):
             tien_trinh.append(
-                Process(dong["PID"], dong["ArrivalTime"], dong["BurstTime"]))
+                Process(dong["ProcessID"], dong["ArrivalTime"], dong["BurstTime"]))
     return tien_trinh
 
 
@@ -59,7 +59,7 @@ def doc_oracle(duong_dan, thuat_toan="FCFS"):
             if dong["Algorithm"].strip() != thuat_toan:
                 continue
             ket_qua.setdefault(dong["TestCase"].strip(), []).append({
-                "PID": dong["PID"].strip(),
+                "ProcessID": dong["ProcessID"].strip(),
                 "AT": int(dong["ArrivalTime"]),
                 "BT": int(dong["BurstTime"]),
                 "ST": int(dong["StartTime"]),
@@ -76,7 +76,7 @@ def gantt_mong_doi(rows):
     for r in rows:
         if hien_tai < r["ST"]:
             gantt.append(("IDLE", hien_tai, r["ST"]))
-        gantt.append((r["PID"], r["ST"], r["CT"]))
+        gantt.append((r["ProcessID"], r["ST"], r["CT"]))
         hien_tai = r["CT"]
     return gantt
 
@@ -85,7 +85,7 @@ def gantt_mong_doi(rows):
 class TestFCFSDuLieuMau(unittest.TestCase):
 
     def so_sanh(self, ket_qua, bang):
-        """bang: danh sách (PID, ST, CT, TAT, WT, RT) theo thứ tự chạy."""
+        """bang: danh sách (ProcessID, ST, CT, TAT, WT, RT) theo thứ tự chạy."""
         self.assertEqual([p.pid for p in ket_qua], [b[0] for b in bang],
                          "Sai thứ tự chạy")
         for p, (pid, st, ct, tat, wt, rt) in zip(ket_qua, bang):
@@ -133,15 +133,15 @@ ORACLE = doc_oracle(ORACLE_PATH) if ORACLE_PATH else {}
 class TestFCFSOracle(unittest.TestCase):
 
     def kiem_tra(self, rows, dao_thu_tu_dau_vao=False):
-        dau_vao = [Process(r["PID"], r["AT"], r["BT"]) for r in rows]
+        dau_vao = [Process(r["ProcessID"], r["AT"], r["BT"]) for r in rows]
         if dao_thu_tu_dau_vao:
             dau_vao.reverse()
         ket_qua, gantt = SchedulerEngine.run_fcfs(dau_vao)
 
-        self.assertEqual([p.pid for p in ket_qua], [r["PID"] for r in rows],
+        self.assertEqual([p.pid for p in ket_qua], [r["ProcessID"] for r in rows],
                          "Sai thứ tự chạy")
         for p, r in zip(ket_qua, rows):
-            with self.subTest(pid=r["PID"]):
+            with self.subTest(pid=r["ProcessID"]):
                 self.assertEqual(p.st, r["ST"], "StartTime lệch")
                 self.assertEqual(p.ft, r["CT"], "CompletionTime lệch")
                 self.assertEqual(p.tat, r["TAT"], "TurnaroundTime lệch")
