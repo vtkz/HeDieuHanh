@@ -188,17 +188,16 @@ Thứ tự chạy: P1
 Trạng thái: BLOCKED (chờ code)
 
 ---
+### TC06 - Nhiều tiến trình có BurstTime bằng nhau
 
-## TC06 - Nhiều tiến trình có BurstTime bằng nhau
+File đầu vào: `data/equal_burst.csv`
 
-File đầu vào: data/equal_burst.csv
-
-​```csv
+```csv
 ProcessID,ArrivalTime,BurstTime
 P1,0,4
 P2,0,2
 P3,0,2
-​```
+```
 
 Ghi chú: P2 và P3 có BT bằng nhau (đều bằng 2), phá hòa theo ProcessID nên P2 chạy trước P3.
 
