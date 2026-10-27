@@ -232,5 +232,23 @@ class TestDataIO(unittest.TestCase):
         self.assertEqual(rows[0]["ProcessID"], "P1")
         self.assertEqual(rows[0]["CompletionTime"], "5")
 
+    def test_reject_extra_csv_column(self):
+        self.write_csv(
+            "ProcessID,ArrivalTime,BurstTime\n"
+            "P1,0,5,extra\n"
+        )
+
+        with self.assertRaisesRegex(ValueError, "nhieu cot"):
+            read_processes_csv(self.input_file)
+
+    def test_reject_missing_csv_value(self):
+        self.write_csv(
+            "ProcessID,ArrivalTime,BurstTime\n"
+            "P1,0\n"
+        )
+
+        with self.assertRaisesRegex(ValueError, "thieu cot"):
+            read_processes_csv(self.input_file)
+
 if __name__ == "__main__":
     unittest.main()

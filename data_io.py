@@ -8,6 +8,7 @@ DEFAULT_INPUT_FILE = PROJECT_DIR / "input" / "processes.csv"
 REQUIRED_COLUMNS = ["ProcessID", "ArrivalTime", "BurstTime"]
 
 
+
 def read_processes_csv(file_path=DEFAULT_INPUT_FILE):
     processes = []
     process_ids = set()
@@ -19,16 +20,38 @@ def read_processes_csv(file_path=DEFAULT_INPUT_FILE):
             if reader.fieldnames is None:
                 raise ValueError("File CSV rong hoac khong co tieu de.")
 
-            headers = [name.strip() for name in reader.fieldnames]
+            headers = [name.strip() if name else "" for name in reader.fieldnames]
 
             if headers != REQUIRED_COLUMNS:
                 raise ValueError(
                     "Tieu de CSV phai la: ProcessID,ArrivalTime,BurstTime."
                 )
 
+            reader.fieldnames = headers
+
             for line_number, row in enumerate(reader, start=2):
-                if not any(value and value.strip() for value in row.values() if value):
+                if None in row:
+                    raise ValueError(
+                        f"Dong {line_number}: CSV co nhieu cot hon quy dinh."
+                    )
+
+                if not any(
+                    value and value.strip()
+                    for value in row.values()
+                    if isinstance(value, str)
+                ):
                     continue
+
+                missing_columns = [
+                    column
+                    for column in REQUIRED_COLUMNS
+                    if row.get(column) is None
+                ]
+
+                if missing_columns:
+                    raise ValueError(
+                        f"Dong {line_number}: CSV thieu cot du lieu."
+                    )
 
                 process_id = (row.get("ProcessID") or "").strip()
                 arrival_text = (row.get("ArrivalTime") or "").strip()
@@ -79,7 +102,6 @@ def read_processes_csv(file_path=DEFAULT_INPUT_FILE):
         raise ValueError("File CSV khong co tien trinh hop le.")
 
     return processes
-
 
 def export_results_csv(results, file_path=None):
     if file_path is None:
