@@ -45,12 +45,37 @@ ProcessID,ArrivalTime,BurstTime
 
 ## 4. Output CSV
 
-The application exports simulation results to a CSV file. The output must contain the result fields required by the application, and invalid or inconsistent result data must be rejected.
+The application exports simulation results to `output/simulation_results.csv` by default. A custom output path can also be provided.
+
+The standard output columns are listed in the following order:
+
+| Column | Description |
+|---|---|
+| ProcessID | Process identifier |
+| ArrivalTime | Process arrival time |
+| BurstTime | CPU burst time |
+| StartTime | Process execution start time |
+| CompletionTime | Process completion time |
+| TurnaroundTime | Total time from arrival to completion |
+| WaitingTime | Time spent waiting in the ready queue |
+| ResponseTime | Time from arrival until first execution |
+
+Output validation rules:
+
+- The results list must not be empty.
+- All result rows must contain the same column names in the same order.
+- Invalid or inconsistent result data must be rejected.
+- The output directory is created automatically if it does not exist.
+- The CSV file is written using UTF-8 with BOM encoding.
 
 ## 5. Verification
 
-The CSV data I/O test suite is executed with:
+Run the CSV data I/O test suite using the following command:
 
+```bash
 python -m unittest discover -s tests -v
+```
 
-The current test suite contains 18 tests. All tests should pass before the changes are committed.
+The test suite covers CSV input parsing, input validation, simulation result export, and invalid or inconsistent data handling.
+
+All tests must pass before the CSV data I/O changes are considered ready for submission. The test count should be updated whenever tests are added or removed.
