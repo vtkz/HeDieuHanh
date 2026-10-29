@@ -103,6 +103,40 @@ class SchedulerGUIApp:
         self.tree.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side="right", fill="y")
 
+                # Khu vực biểu đồ Gantt
+        gantt_frame = ttk.LabelFrame(
+            self.root,
+            text="Biểu đồ Gantt - Lịch sử thực thi CPU"
+        )
+        gantt_frame.pack(
+            fill="x",
+            padx=15,
+            pady=5
+        )
+
+        self.gantt_canvas = tk.Canvas(
+            gantt_frame,
+            height=130,
+            background="white",
+            highlightthickness=1,
+            highlightbackground="#cccccc"
+        )
+        self.gantt_canvas.pack(
+            fill="x",
+            expand=True,
+            padx=8,
+            pady=8
+        )
+
+        self.gantt_canvas.create_text(
+            20,
+            35,
+            anchor="w",
+            text="Chạy mô phỏng để hiển thị biểu đồ Gantt.",
+            fill="gray",
+            font=("Arial", 10)
+        )
+
         control_frame = ttk.Frame(self.root)
         control_frame.pack(fill="x", padx=15, pady=10)
 
@@ -264,6 +298,128 @@ class SchedulerGUIApp:
 
             self.tree.insert("", tk.END, values=values)
 
+    def draw_gantt_chart(self, gantt_chart):
+        """Vẽ biểu đồ Gantt từ kết quả của thuật toán lập lịch CPU."""
+        canvas = self.gantt_canvas
+        canvas.delete("all")
+
+        if not gantt_chart:
+            canvas.create_text(
+                20, 35,
+                anchor="w",
+                text="Không có dữ liệu để vẽ biểu đồ Gantt.",
+                fill="gray"
+            )
+            return
+
+        canvas.update_idletasks()
+
+        width = max(canvas.winfo_width(), 500)
+
+        left_margin = 40
+        right_margin = 25
+        top = 35
+        block_height = 42
+
+        total_time = max(end for _, _, end in gantt_chart)
+
+        if total_time <= 0:
+            canvas.create_text(
+                20, 35,
+                anchor="w",
+                text="Tổng thời gian thực thi không hợp lệ.",
+                fill="red"
+            )
+            return
+
+        available_width = max(
+            width - left_margin - right_margin,
+            100
+        )
+        scale = available_width / total_time
+
+        colors = [
+            "#8ecae6",
+            "#90be6d",
+            "#ffb703",
+            "#cdb4db",
+            "#f4a261",
+            "#a8dadc",
+            "#b7b7a4"
+        ]
+
+        canvas.create_text(
+            left_margin,
+            12,
+            anchor="nw",
+            text=f"Thuật toán: {self.last_algorithm}",
+            font=("Arial", 10, "bold")
+        )
+
+        # Vẽ từng đoạn thực thi CPU
+        for index, (process_id, start_time, end_time) in enumerate(gantt_chart):
+            x1 = left_margin + start_time * scale
+            x2 = left_margin + end_time * scale
+
+            if process_id == "IDLE":
+                fill_color = "#e0e0e0"
+            else:
+                fill_color = colors[index % len(colors)]
+
+            canvas.create_rectangle(
+                x1,
+                top,
+                x2,
+                top + block_height,
+                fill=fill_color,
+                outline="#333333",
+                width=1
+            )
+
+            canvas.create_text(
+                (x1 + x2) / 2,
+                top + block_height / 2,
+                text=str(process_id),
+                font=("Arial", 10, "bold")
+            )
+
+            # Vạch đánh dấu thời điểm bắt đầu
+            canvas.create_line(
+                x1,
+                top + block_height,
+                x1,
+                top + block_height + 10,
+                fill="#333333"
+            )
+
+            canvas.create_text(
+                x1,
+                top + block_height + 12,
+                text=str(start_time),
+                anchor="n",
+                font=("Arial", 9)
+            )
+
+        # Đánh dấu thời điểm kết thúc của đoạn cuối
+        final_time = gantt_chart[-1][2]
+        final_x = left_margin + final_time * scale
+
+        canvas.create_line(
+            final_x,
+            top + block_height,
+            final_x,
+            top + block_height + 10,
+            fill="#333333"
+        )
+
+        canvas.create_text(
+            final_x,
+            top + block_height + 12,
+            text=str(final_time),
+            anchor="n",
+            font=("Arial", 9)
+        )   
+
     def run_simulation(self):
         if not self.processes:
             messagebox.showwarning(
@@ -290,6 +446,13 @@ class SchedulerGUIApp:
         self.last_algorithm = algorithm
 
         self.refresh_table(results)
+
+        self.last_results = results
+        self.last_gantt_chart = gantt_chart
+        self.last_algorithm = algorithm
+
+        self.refresh_table(results)
+        self.draw_gantt_chart(gantt_chart)
 
         number_of_processes = len(results)
         average_waiting_time = (
