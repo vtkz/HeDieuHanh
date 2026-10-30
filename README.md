@@ -58,11 +58,11 @@ python gui.py
 
 | Thành viên | Vai trò | Công việc phụ trách |
 | :--- | :--- | :--- |
-| **** | Group Leader & FCFS Dev | Thiết kế kiến trúc, cài đặt FCFS, quản lý Repo Git |
-| **** | SJF Dev & Test Oracle | Cài đặt SJF Non-Preemptive, lập bộ Test Oracle |
-| **** | GUI & Visualizer | Xây dựng Desktop GUI (gui.py), vẽ sơ đồ Gantt |
-| **** | Data Engine | Xây dựng CSV Handler, kiểm tra bẫy lỗi (Validation) |
-| **** | QA & Stress Test | Chạy Stress Test (N=10-3000), vẽ biểu đồ hiệu năng |
+| **ThanhLong** | Group Leader & FCFS Dev | Thiết kế kiến trúc, cài đặt FCFS, quản lý Repo Git |
+| **TrongNguyen** | SJF Dev & Test Oracle | Cài đặt SJF Non-Preemptive, lập bộ Test Oracle |
+| **KiemDung** | GUI & Visualizer | Xây dựng Desktop GUI (gui.py), vẽ sơ đồ Gantt |
+| **BichDiem** | Data Engine | Xây dựng CSV Handler, kiểm tra bẫy lỗi (Validation) |
+| **MinhDuy** | QA & Stress Test | Chạy Stress Test (N=10-3000), vẽ biểu đồ hiệu năng |
 
 ---
 
