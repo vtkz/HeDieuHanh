@@ -58,7 +58,7 @@ python gui.py
 ### 4. BẢNG PHÂN CÔNG THÀNH VIÊN & LỊCH SỬ GIT COMMIT
 
 | Thành viên | Vai trò | Công việc phụ trách |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- |
 | **** | Group Leader & FCFS Dev | Thiết kế kiến trúc, cài đặt FCFS, quản lý Repo Git |
 | **** | SJF Dev & Test Oracle | Cài đặt SJF Non-Preemptive, lập bộ Test Oracle |
 | **** | GUI & Visualizer | Xây dựng Desktop GUI (gui.py), vẽ sơ đồ Gantt |
