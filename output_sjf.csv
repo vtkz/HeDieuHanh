@@ -1,0 +1,18 @@
+=== SCHEDULING REPORT: SJF Non-Preemptive ===
+ProcessID,ArrivalTime,BurstTime,Start_Time,Finish_Time,Turnaround_Time,Waiting_Time,Response_Time
+P1,0,7,0,7,7,0,0
+P3,4,1,7,8,4,3,3
+P2,2,4,8,12,10,6,6
+P4,5,4,12,16,11,7,7
+
+SUMMARY METRICS
+Average Turnaround Time (Avg TAT),8.00
+Average Waiting Time (Avg WT),4.00
+Average Response Time (Avg RT),4.00
+
+GANTT CHART TRACE LOG
+Task_ProcessID,Start_Time,Finish_Time,Duration
+P1,0,7,7
+P3,7,8,1
+P2,8,12,4
+P4,12,16,4
