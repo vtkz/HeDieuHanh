@@ -158,18 +158,20 @@ Cập nhật sau mỗi lần chạy. Trạng thái: PASS, FAIL hoặc BLOCKED.
 | Mã TC | Dữ liệu vào | Thuật toán | Kết quả mong đợi (tóm tắt) | Kết quả thực tế | Trạng thái | Người chạy | Ngày | Ghi chú |
 |---|---|---|---|---|---|---|---|---|
 | TC01 | normal.csv | FCFS | P1 -> P2 -> P3 -> P4 | Khớp bảng TC01 | PASS | TV5 | 27/10/2026 | Unit test |
-| TC01 | normal.csv | SJF | P1 -> P3 -> P2 -> P4 | | BLOCKED | | | Chờ code |
-| TC02 | cpu_idle.csv | FCFS, SJF | P1 -> P2; Idle 0-2 và 5-8 | FCFS khớp; SJF chưa chạy | FCFS: PASS; SJF: BLOCKED | TV5 | 27/10/2026 | Chờ SJF |
-| TC03 | invalid_data.csv | Đọc CSV | Từ chối, báo 3 lỗi, không crash | Không báo lỗi | FAIL | TV5 | 27/10/2026 | BUG01, BUG03 |
+| TC01 | normal.csv | SJF | P1 -> P3 -> P2 -> P4 | Khớp bảng TC01 | PASS | TV5 | 30/10/2026 | Unit test |
+| TC02 | cpu_idle.csv | FCFS, SJF | P1 -> P2; Idle 0-2 và 5-8 | Khớp | PASS | TV5 | 27/10/2026 (FCFS), 30/10/2026 (SJF) | Unit test |
+| TC03 | invalid_data.csv | Đọc CSV | Từ chối, báo 3 lỗi, không crash | Báo ValueError (AT âm) | PASS | TV5 | 30/10/2026 | BUG01 đã sửa; chưa kiểm riêng BT = 0 và ProcessID trùng |
 | TC04 | same_arrival.csv | FCFS | P1 -> P2 -> P3 | Khớp bảng TC04 | PASS | TV5 | 27/10/2026 | Unit test |
-| TC04 | same_arrival.csv | SJF | P2 -> P3 -> P1 | | BLOCKED | | | Chờ code |
-| TC05 | single_process.csv | FCFS, SJF | P1; CT = 5, TAT = 5, WT = 0, RT = 0 | | BLOCKED | | | Chờ code |
-| TC06 | equal_burst.csv | FCFS, SJF | FCFS: P1 -> P2 -> P3; SJF: P2 -> P3 -> P1 | | BLOCKED | | | Chờ code |
+| TC04 | same_arrival.csv | SJF | P2 -> P3 -> P1 | Khớp bảng TC04 | PASS | TV5 | 30/10/2026 | Unit test |
+| TC05 | single_process.csv | FCFS | P1; CT = 5, TAT = 5, WT = 0, RT = 0 | | BLOCKED | | | Chờ code |
+| TC05 | single_process.csv | SJF | P1; CT = 5, TAT = 5, WT = 0, RT = 0 | Khớp | PASS | TV5 | 30/10/2026 | Unit test |
+| TC06 | equal_burst.csv | FCFS | P1 -> P2 -> P3 | | BLOCKED | | | Chờ code |
+| TC06 | equal_burst.csv | SJF | P2 -> P3 -> P1 | Khớp | PASS | TV5 | 30/10/2026 | Unit test |
 | TC07 | process_during_busy.csv | FCFS | P1 -> P2 -> P3 | | BLOCKED | | | Chờ code |
-| TC07 | process_during_busy.csv | SJF | P1 -> P3 -> P2 | | BLOCKED | | | Chờ code |
-| TC08 | missing_column.csv | Đọc CSV | Báo thiếu cột BurstTime | Không báo lỗi | FAIL | TV5 | 27/10/2026 | BUG02 |
-| TC09 | non_numeric.csv | Đọc CSV | Báo AT không phải số | Không báo lỗi | FAIL | TV5 | 27/10/2026 | BUG01 |
-| TC10 | empty_pid.csv | Đọc CSV | Báo ProcessID trống | Không báo lỗi | FAIL | TV5 | 27/10/2026 | BUG02 |
+| TC07 | process_during_busy.csv | SJF | P1 -> P3 -> P2 | Khớp | PASS | TV5 | 30/10/2026 | Unit test |
+| TC08 | missing_column.csv | Đọc CSV | Báo thiếu cột BurstTime | Không báo lỗi | FAIL | TV5 | 30/10/2026 | BUG02 |
+| TC09 | non_numeric.csv | Đọc CSV | Báo AT không phải số | Báo ValueError | PASS | TV5 | 30/10/2026 | BUG01 đã sửa ||
+| TC10 | empty_pid.csv | Đọc CSV | Báo ProcessID trống | Không báo lỗi | FAIL | TV5 | 30/10/2026 | BUG02 |
 | TC11 | header_only.csv | Đọc CSV | Báo không có tiến trình | | BLOCKED | | | Chờ code |
 | TC12 | perf_*.csv | FCFS, SJF | Hoàn thành, ghi thời gian | | BLOCKED | | | Chờ code và dữ liệu |
 
@@ -177,17 +179,17 @@ Cập nhật sau mỗi lần chạy. Trạng thái: PASS, FAIL hoặc BLOCKED.
 
 | Mã lỗi | Test case | Mô tả lỗi | Mức độ | Người phụ trách sửa | Trạng thái | Kết quả kiểm tra lại |
 |---|---|---|---|---|---|---|
-| BUG01 | TC03, TC09 | CSVHandler đọc cột `Arrival_Time` và `Burst_Time`, trong khi spec dùng `ArrivalTime` và `BurstTime`; file CSV theo spec bị bỏ qua mọi dòng mà không báo lỗi | Cao | TV1 | Mở | |
-| BUG02 | TC08, TC10 | Thiếu cột hoặc ProcessID trống: code `continue` bỏ qua dòng thay vì báo lỗi (spec mục 9 yêu cầu từ chối); lỗi này còn nguyên kể cả khi sửa tên cột | Cao | TV1 | Mở | |
-| BUG03 | TC03 | Không kiểm tra ProcessID trùng (spec mục 9) | Trung bình | TV1 | Mở | |
+| BUG01 | TC03, TC09 | CSVHandler đọc cột `Arrival_Time` và `Burst_Time`, trong khi spec dùng `ArrivalTime` và `BurstTime`; file CSV theo spec bị bỏ qua mọi dòng mà không báo lỗi | Cao | TV1 | Đã sửa | TC03, TC09 PASS ngày 30/10/2026 |
+| BUG02 | TC08, TC10 | Thiếu cột hoặc ProcessID trống: code `continue` bỏ qua dòng thay vì báo lỗi (spec mục 9 yêu cầu từ chối) | Cao | TV1 | Mở | TC08, TC10 vẫn FAIL ngày 30/10/2026 |
+| BUG03 | TC03 | Không kiểm tra ProcessID trùng (spec mục 9) | Trung bình | TV1 | Mở (chưa xác minh) | TC03 PASS vì lỗi AT âm được bắt trước; ProcessID trùng chưa kiểm riêng |
 
-## 15. Kết quả Unit Test FCFS
+## 15. Kết quả Unit Test FCFS 
 
 File test: `tests/test_fcfs.py`
 
 Lệnh chạy: `python -m unittest discover -s tests -v`
 
-Tổng: 12 test, 8 PASS, 4 FAIL.
+Tổng: 12 test, 10 PASS, 2 FAIL.
 
 | Test | Nội dung | Kết quả mong đợi | Kết quả thực tế | Trạng thái |
 |---|---|---|---|---|
@@ -196,9 +198,41 @@ Tổng: 12 test, 8 PASS, 4 FAIL.
 | test_tc04_tien_trinh_den_cung_luc | same_arrival.csv | Khớp bảng TC04 | Khớp | PASS |
 | test_oracle_Test1_Basic | Oracle của TV2 | Khớp oracle | Khớp | PASS |
 | test_oracle_Test2_Idle | Oracle của TV2 | Khớp oracle | Khớp | PASS |
-| test_tc03_at_am_bt_bang_0_pid_trung | invalid_data.csv | Báo lỗi ValueError | Không báo lỗi | FAIL (BUG01, BUG03) |
+| test_tc03_at_am_bt_bang_0_pid_trung | invalid_data.csv | Báo lỗi ValueError | Báo ValueError | PASS (BUG01 đã sửa) |
+| test_tc09_at_khong_phai_so | non_numeric.csv | Báo lỗi ValueError | Báo ValueError | PASS (BUG01 đã sửa) |
 | test_tc08_thieu_cot | missing_column.csv | Báo lỗi ValueError | Không báo lỗi | FAIL (BUG02) |
-| test_tc09_at_khong_phai_so | non_numeric.csv | Báo lỗi ValueError | Không báo lỗi | FAIL (BUG01) |
 | test_tc10_pid_trong | empty_pid.csv | Báo lỗi ValueError | Không báo lỗi | FAIL (BUG02) |
 
 Các test oracle chạy 2 lần (đầu vào giữ nguyên và đảo ngược thứ tự), cả hai đều đạt.
+
+## 16. Kết quả Unit Test SJF 
+
+File test: `tests/test_sjf.py`
+
+Lệnh chạy: `python tests/test_sjf.py`
+
+Tổng: 22 test, 22 PASS, 0 FAIL.
+
+### Góc chết (corner cases)
+
+| Mã | Góc chết | Dữ liệu (AT, BT) | Kết quả mong đợi | Trạng thái |
+|---|---|---|---|---|
+| GC01 | Đến cùng lúc, BT khác nhau | P1(0,6) P2(0,2) P3(0,4) | P2 -> P3 -> P1 | PASS |
+| GC02 | Đến cùng lúc, BT bằng nhau, phá hòa theo ProcessID | P3(0,3) P1(0,3) P2(0,3) | P1 -> P2 -> P3 | PASS |
+| GC03 | BT bằng nhau, AT ưu tiên hơn ProcessID | P1(0,5) P2(2,3) P3(1,3) | P1 -> P3 -> P2 | PASS |
+| GC04 | Chênh lệch BT lớn, không ngắt tiến trình đang chạy | P1(0,1000) P2(1,1) P3(2,1) P4(3,2) | P1 -> P2 -> P3 -> P4 | PASS |
+| GC05 | BT cực lớn (10^9) | P1(0,10^9) P2(0,1) | P2 -> P1 | PASS |
+| GC06 | Đến đúng lúc CPU rảnh | P1(0,4) P2(4,2) P3(4,1) | P1 -> P3 -> P2 | PASS |
+| GC07 | Đến sau CPU rảnh 1 đơn vị | P1(0,4) P2(5,1) | P1, Idle 4-5, P2 | PASS |
+| GC08 | CPU Idle đầu và giữa | P1(3,2) P2(10,1) | Idle 0-3, P1, Idle 5-10, P2 | PASS |
+| GC09 | Một tiến trình | P1(0,5) | P1 | PASS |
+| GC10 | Danh sách rỗng | (không có) | Không lỗi, kết quả rỗng | PASS |
+| GC11 | 5 tiến trình đến cùng lúc, BT giảm dần | P1(0,5) ... P5(0,1) | P5 -> P4 -> P3 -> P2 -> P1 | PASS |
+| GC12 | 300 bộ ngẫu nhiên (seed 2026), BT từ 1 đến 5000 | Ngẫu nhiên | Đúng quy tắc SJF | PASS |
+
+### Dữ liệu mẫu và oracle
+
+| Test | Nội dung | Trạng thái |
+|---|---|---|
+| test_tc01, test_tc02, test_tc04, test_tc05, test_tc06, test_tc07 | Dữ liệu trong `data/` so với bảng SJF trong `test_cases.md` | PASS |
+| test_oracle_Test1_Basic, Test2_Idle, Test3_TieBreak | Đối chiếu oracle của TV2 | PASS |   

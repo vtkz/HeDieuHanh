@@ -1,4 +1,4 @@
-"""Unit test cho FCFS (SchedulerEngine.run_fcfs trong main.py) - TV5, tuần 3.
+"""Unit test cho FCFS (SchedulerEngine.run_fcfs trong main.py) 
 
 Nội dung kiểm thử:
   1. Dữ liệu thông thường (TC01), CPU Idle (TC02), tiến trình đến cùng lúc (TC04):
@@ -34,13 +34,16 @@ ORACLE_CANDIDATES = [
 
 # ---------------------------------------------------------------- tiện ích
 def doc_csv_theo_spec(duong_dan):
-    """Đọc file CSV theo đúng định dạng spec (ProcessID,ArrivalTime,BurstTime).
+    """Đọc CSV theo vị trí cột (mã tiến trình, AT, BT), bỏ dòng tiêu đề.
+    Không phụ thuộc tên cột (ProcessID hay ProcessID) nên đổi tên tiêu đề không làm hỏng test.
     Dùng riêng cho test, không phụ thuộc CSVHandler để test FCFS độc lập."""
     tien_trinh = []
     with open(duong_dan, newline="", encoding="utf-8") as f:
-        for dong in csv.DictReader(f):
-            tien_trinh.append(
-                Process(dong["ProcessID"], dong["ArrivalTime"], dong["BurstTime"]))
+        reader = csv.reader(f)
+        next(reader, None)
+        for dong in reader:
+            if dong and any(c.strip() for c in dong):
+                tien_trinh.append(Process(dong[0], dong[1], dong[2]))
     return tien_trinh
 
 
@@ -59,7 +62,7 @@ def doc_oracle(duong_dan, thuat_toan="FCFS"):
             if dong["Algorithm"].strip() != thuat_toan:
                 continue
             ket_qua.setdefault(dong["TestCase"].strip(), []).append({
-                "ProcessID": dong["ProcessID"].strip(),
+                "ProcessID": (dong.get("ProcessID") or dong.get("ProcessID") or "").strip(),
                 "AT": int(dong["ArrivalTime"]),
                 "BT": int(dong["BurstTime"]),
                 "ST": int(dong["StartTime"]),
