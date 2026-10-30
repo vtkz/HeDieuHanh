@@ -1,0 +1,18 @@
+"=== SCHEDULING REPORT: First-Come, First-Served ==="
+ProcessID,ArrivalTime,BurstTime,StartTime,FinishTime,TurnaroundTime,WaitingTime,ResponseTime
+P1,0,7,0,7,7,0,0
+P2,2,4,7,11,9,5,5
+P3,4,1,11,12,8,7,7
+P4,5,4,12,16,11,7,7
+
+SUMMARY METRICS
+Average Turnaround Time,8.75
+Average Waiting Time,4.75
+Average Response Time,4.75
+
+GANTT CHART TRACE LOG
+ProcessID,StartTime,FinishTime,Duration
+P1,0,7,7
+P2,7,11,4
+P3,11,12,1
+P4,12,16,4
