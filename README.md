@@ -60,7 +60,7 @@ python gui.py
 
 ---
 
-### 4. BẢNG PHÂN CÔNG THÀNH VIÊN & LỊCH SỬ GIT COMMIT
+### 4. BẢNG PHÂN CÔNG THÀNH VIÊN
 
 | Thành viên | Vai trò | Công việc phụ trách |
 | :--- | :--- | :--- |
