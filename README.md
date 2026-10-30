@@ -17,7 +17,6 @@ OS_SCH_01_PROJECT/
 ├── output_sjf.csv                  # Kết quả xuất vết chạy và chỉ số thống kê SJF
 ├── gantt.png                       # Biểu đồ thanh Gantt Chart so sánh FCFS vs SJF
 ├── benchmark.png                   # Đồ thị đánh giá hiệu năng Stress Test O(N log N) vs O(N^2)
-├── Bao_Cao_Do_An_OS_SCH_01.docx    # Báo cáo Đồ án hoàn chỉnh 8-12 trang chuẩn định dạng UTH
 └── README.md                       # Tài liệu hướng dẫn cài đặt và vận hành
 ```
 
