@@ -1,4 +1,4 @@
-"""Unit test cho SJF không độc quyền (SchedulerEngine.run_sjf_non_preemptive) - TV5, tuần 4.
+"""Unit test cho SJF không độc quyền (SchedulerEngine.run_sjf_non_preemptive)
 
 Nội dung kiểm thử:
   1. Góc chết (corner cases): đến đồng thời, BT bằng nhau, chênh lệch BT rất lớn,
@@ -6,7 +6,7 @@ Nội dung kiểm thử:
      Dữ liệu viết thẳng trong test nên không phụ thuộc file CSV hay tên cột.
   2. Dữ liệu mẫu trong data/ (TC01, TC02, TC04, TC05, TC06, TC07),
      so với bảng SJF tính tay trong docs/test_cases.md.
-  3. So sánh kết quả SJF với bảng Test Oracle (test_oracle.csv) của TV2.
+  3. So sánh kết quả SJF với bảng Test Oracle (test_oracle.csv) 
 
 Mỗi ca chạy 2 lần: đầu vào giữ nguyên và đầu vào đảo ngược thứ tự.
 Mọi kết quả đều được kiểm tra thêm các tính chất bắt buộc: công thức thời gian,
