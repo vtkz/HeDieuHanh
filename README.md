@@ -1,15 +1,15 @@
 # CPU SCHEDULING SIMULATOR (OS_SCH_01)
-## FIRST-COME, FIRST-SERVED & SHORTEST JOB FIRST NON-PREEMPTIVE
+## FCFS & SJF NON-PREEMPTIVE ALGORITHM SIMULATION
 
-Operating System Course Project (125001) - Ho Chi Minh City University of Transport (UTH).
-Topic: **OS_SCH_01 - CPU Scheduling Simulation for First-Come, First-Served and Shortest Job First Non-Preemptive Algorithms**.
+Đồ án môn học **Hệ Điều Hành (125001)** - Trường Đại học Giao thông vận tải TP.HCM (UTH).
+Đề tài: **OS_SCH_01 - Mô phỏng thuật toán lập lịch CPU FCFS và SJF Không cướp quyền**.
 
 ---
 
-### 1. PROJECT STRUCTURE & DIRECTORY LAYOUT
+### 1. CẤU TRÚC THƯ MỤC DỰ ÁN & DANH SÁCH FILE SHORTENED
 
 ```text
-OS_SCH_01_PROJECT/
+HeDieuHanh/
 ├── main.py                         # Core execution & Test Oracle runner
 ├── gui.py                          # Graphical User Interface application (Tkinter)
 ├── input/                          # Input data directory
@@ -23,64 +23,55 @@ OS_SCH_01_PROJECT/
 │   └── benchmark.png               # Performance stress test plot (O(N log N) vs O(N^2))
 ├── test/                           # Automated testing directory
 │   └── test_oracle.py              # Test Oracle verification suite
-├── Bao_Cao_Do_An_OS_SCH_01.docx    # Official academic project report document
-├── TIEN_DO_MA_NGUON_THEO_TUAN.md   # Incremental weekly progress tracking log
 └── README.md                       # Project documentation and execution guide
 ```
 
 ---
 
-### 2. INSTALLATION & EXECUTION GUIDE
+### 2. HƯỚNG DẪN CÀI ĐẶT VÀ VẬN HÀNH
 
-#### 2.1 System Requirements:
-* Python 3.8+
-* Required Dependencies: `matplotlib`
+#### 2.1 Yêu cầu môi trường:
+* Python 3.8+ 
+* Thư viện phụ thuộc: `matplotlib`
 
-Install dependencies using:
+Cài đặt thư viện:
 ```bash
 pip install matplotlib
 ```
 
-#### 2.2 Launch Graphical User Interface Application:
-To run the interactive desktop application:
+#### 2.2 Chạy ứng dụng Desktop GUI:
 ```bash
 python gui.py
 ```
-*Features:* Manual process entry, strict input validation (ArrivalTime >= 0, BurstTime > 0), CSV file loading/exporting, algorithm selection, execution table with ProcessID, ArrivalTime, BurstTime, StartTime, FinishTime, TurnaroundTime, WaitingTime, ResponseTime, and summary statistics.
-
-#### 2.3 Automated Test Execution & Command Line Simulation:
-To execute the automated Test Oracle suite, generate output CSV files, and render visualization plots:
-```bash
-python main.py
-```
+*Tính năng GUI:* Nhập tiến trình thủ công, kiểm tra bẫy lỗi dữ liệu (ArrivalTime >= 0, BurstTime > 0), nạp file `input.csv`, chọn thuật toán FCFS/SJF, hiển thị thời gian ST, FT, TAT, WT, RT và xuất báo cáo CSV.
 
 ---
 
-### 3. TIE-BREAKING RULES
+### 3. QUY TẮC 
 
-1. **First-Come, First-Served Algorithm:**
-   * Priority 1: Smallest ArrivalTime.
-   * Priority 2: Smallest ProcessID (Alphanumeric order).
+1. **Thuật toán FCFS:**
+   * Ưu tiên 1: ArrivalTime nhỏ nhất.
+   * Ưu tiên 2: ProcessID nhỏ nhất theo thứ tự từ điển (Alphanumeric).
 
-2. **Shortest Job First Non-Preemptive Algorithm:**
-   * Priority 1: Smallest BurstTime.
-   * Priority 2: Smallest ArrivalTime.
-   * Priority 3: Smallest ProcessID (Alphanumeric order).
+2. **Thuật toán SJF Không cướp quyền:**
+   * Ưu tiên 1: BurstTime nhỏ nhất.
+   * Ưu tiên 2: ArrivalTime nhỏ nhất.
+   * Ưu tiên 3: ProcessID nhỏ nhất theo thứ tự từ điển (Alphanumeric).
 
 ---
 
-### 4. TEAM MEMBER RESPONSIBILITIES & PARTICIPATION
+### 4. BẢNG PHÂN CÔNG THÀNH VIÊN
 
-| Team Member | Role | Core Responsibilities |
+| Thành viên | Vai trò | Công việc phụ trách |
 | :--- | :--- | :--- |
-| **Member 1** | Group Leader & First-Come First-Served Lead | Architecture design, First-Come First-Served algorithm engine implementation, project management |
-| **Member 2** | Shortest Job First Lead & Test Oracle Specialist | Shortest Job First Non-Preemptive engine implementation, Test Oracle suite development |
-| **Member 3** | Graphical User Interface & Visualization Developer | Desktop application (gui.py) development, Gantt chart renderer implementation |
-| **Member 4** | Data Engine Developer | CSV Handler implementation, input data validation and error handling |
-| **Member 5** | Quality Assurance & Performance Benchmark Engineer | Performance stress testing (N = 10 to 3000 processes), benchmark plot generation |
+| **ThanhLong** | Group Leader & FCFS Dev | Thiết kế kiến trúc, cài đặt FCFS, quản lý Repo Git |
+| **TrongNguyen** | SJF Dev & Test Oracle | Cài đặt SJF Non-Preemptive, lập bộ Test Oracle |
+| **KiemDung** | GUI & Visualizer | Xây dựng Desktop GUI (gui.py), vẽ sơ đồ Gantt |
+| **BichDiem** | Data Engine | Xây dựng CSV Handler, kiểm tra bẫy lỗi (Validation) |
+| **MinhDuy** | QA & Stress Test | Chạy Stress Test (N=10-3000), vẽ biểu đồ hiệu năng |
 
 ---
 
-### 5. AI USE STATEMENT
+### 5. KHAI BÁO SỬ DỤNG AI (AI USE STATEMENT)
 
-The team declares the transparent use of AI tools (Gemini Notebook) for library syntax reference, report formatting compliance, and test case suggestions. All core scheduling logic, algorithms, data structures, and verification tests were fully authored and validated by the team.
+Nhóm khai báo sử dụng công cụ AI Gemini trong định hướng thiết kế mã nguồn, tạo giao diện GUI và Visualizer
