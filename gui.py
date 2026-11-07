@@ -152,6 +152,8 @@ class SchedulerGUIApp:
             pady=5
         )
 
+
+
     def add_process(self):
         process_id = self.entry_process_id.get().strip()
         arrival_time_text = self.entry_arrival_time.get().strip()
@@ -205,12 +207,18 @@ class SchedulerGUIApp:
         )
         self.processes.append(process)
 
+        # Xóa kết quả mô phỏng cũ vì danh sách tiến trình đã thay đổi.
+        self.last_results = []
+        self.last_gantt_chart = []
+        self.last_algorithm = None
+
         self.refresh_table()
         self.clear_entries()
 
         self.status_label.config(
-            text=f"Đã thêm tiến trình {process_id}."
+            text="Đã thêm tiến trình. Vui lòng chạy mô phỏng lại."
         )
+
 
     def clear_entries(self):
         self.entry_process_id.delete(0, tk.END)
@@ -264,6 +272,7 @@ class SchedulerGUIApp:
 
             self.tree.insert("", tk.END, values=values)
 
+
     def run_simulation(self):
         if not self.processes:
             messagebox.showwarning(
@@ -274,59 +283,96 @@ class SchedulerGUIApp:
 
         algorithm = self.algorithm_var.get()
 
-        if algorithm == "FCFS":
-            results, gantt_chart = SchedulerEngine.run_fcfs(
-                self.processes
+        if algorithm not in ("FCFS", "SJF"):
+            messagebox.showerror(
+                "Thuật toán không hợp lệ",
+                "Vui lòng chọn FCFS hoặc SJF."
             )
-        else:
-            results, gantt_chart = (
-                SchedulerEngine.run_sjf_non_preemptive(
+            return
+
+        try:
+            if algorithm == "FCFS":
+                results, gantt_chart = SchedulerEngine.run_fcfs(
                     self.processes
+                )
+            else:
+                results, gantt_chart = (
+                    SchedulerEngine.run_sjf_non_preemptive(
+                        self.processes
+                    )
+                )
+
+            if not results:
+                raise ValueError(
+                    "Thuật toán không trả về kết quả mô phỏng."
+                )
+
+            number_of_processes = len(results)
+
+            average_waiting_time = (
+                sum(p.waiting_time for p in results)
+                / number_of_processes
+            )
+            average_turnaround_time = (
+                sum(p.turnaround_time for p in results)
+                / number_of_processes
+            )
+            average_response_time = (
+                sum(p.response_time for p in results)
+                / number_of_processes
+            )
+
+            gantt_text = " | ".join(
+                f"{process_id} [{start_time}-{completion_time}]"
+                for process_id, start_time, completion_time in gantt_chart
+            )
+
+            self.last_results = results
+            self.last_gantt_chart = gantt_chart
+            self.last_algorithm = algorithm
+
+            self.refresh_table(results)
+
+            self.status_label.config(
+                text=(
+                    f"{algorithm} hoàn tất | "
+                    f"AverageWaitingTime: {average_waiting_time:.2f} | "
+                    f"AverageTurnaroundTime: {average_turnaround_time:.2f} | "
+                    f"AverageResponseTime: {average_response_time:.2f}"
                 )
             )
 
-        self.last_results = results
-        self.last_gantt_chart = gantt_chart
-        self.last_algorithm = algorithm
-
-        self.refresh_table(results)
-
-        number_of_processes = len(results)
-        average_waiting_time = (
-            sum(p.waiting_time for p in results)
-            / number_of_processes
-        )
-        average_turnaround_time = (
-            sum(p.turnaround_time for p in results)
-            / number_of_processes
-        )
-        average_response_time = (
-            sum(p.response_time for p in results)
-            / number_of_processes
-        )
-
-        gantt_text = " | ".join(
-            f"{process_id} [{start_time}-{completion_time}]"
-            for process_id, start_time, completion_time in gantt_chart
-        )
-
-        self.status_label.config(
-            text=(
-                f"{algorithm} hoàn tất | "
-                f"AverageWaitingTime: {average_waiting_time:.2f} | "
-                f"AverageTurnaroundTime: {average_turnaround_time:.2f} | "
-                f"AverageResponseTime: {average_response_time:.2f}"
+            messagebox.showinfo(
+                "Kết quả mô phỏng",
+                f"Thuật toán: {algorithm}\n"
+                f"AverageWaitingTime: {average_waiting_time:.2f}\n"
+                f"AverageTurnaroundTime: {average_turnaround_time:.2f}\n"
+                f"AverageResponseTime: {average_response_time:.2f}\n\n"
+                f"Gantt Chart:\n{gantt_text}"
             )
-        )
 
-        messagebox.showinfo(
-            "Kết quả mô phỏng",
-            f"Thuật toán: {algorithm}\n"
-            f"AverageWaitingTime: {average_waiting_time:.2f}\n"
-            f"AverageTurnaroundTime: {average_turnaround_time:.2f}\n"
-            f"AverageResponseTime: {average_response_time:.2f}\n\n"
-            f"Gantt Chart:\n{gantt_text}"
-        )
+        except (ValueError, ZeroDivisionError) as error:
+            self.last_results = []
+            self.last_gantt_chart = []
+            self.last_algorithm = ""
+            self.refresh_table()
+
+            messagebox.showerror(
+                "Lỗi mô phỏng",
+                str(error)
+            )
+
+        except Exception as error:
+            self.last_results = []
+            self.last_gantt_chart = []
+            self.last_algorithm = ""
+            self.refresh_table()
+
+            messagebox.showerror(
+                "Lỗi hệ thống",
+                f"Đã xảy ra lỗi khi chạy mô phỏng:\n{error}"
+            )
+
 
     def import_csv(self):
         file_path = filedialog.askopenfilename(
@@ -366,6 +412,7 @@ class SchedulerGUIApp:
                 f"Không thể đọc file: {error}"
             )
 
+
     def export_csv(self):
         if not self.processes:
             messagebox.showwarning(
@@ -378,6 +425,13 @@ class SchedulerGUIApp:
             messagebox.showwarning(
                 "Chưa chạy mô phỏng",
                 "Vui lòng chạy FCFS hoặc SJF trước khi xuất kết quả."
+            )
+            return
+
+        if self.last_algorithm not in ("FCFS", "SJF"):
+            messagebox.showwarning(
+                "Chưa có kết quả hợp lệ",
+                "Vui lòng chạy lại mô phỏng trước khi xuất."
             )
             return
 
@@ -409,6 +463,11 @@ class SchedulerGUIApp:
                 str(error)
             )
 
+        except Exception as error:
+            messagebox.showerror(
+                "Lỗi hệ thống",
+                f"Đã xảy ra lỗi khi xuất CSV:\n{error}"
+            )
 
 def launch_gui():
     root = tk.Tk()

@@ -103,6 +103,7 @@ def read_processes_csv(file_path=DEFAULT_INPUT_FILE):
 
     return processes
 
+
 def export_results_csv(results, file_path=None):
     if file_path is None:
         file_path = PROJECT_DIR / "output" / "simulation_results.csv"
@@ -114,20 +115,34 @@ def export_results_csv(results, file_path=None):
 
     rows = []
 
+
     for result in results:
         if isinstance(result, dict):
-            rows.append(result)
+            row = result
         else:
-            rows.append({
-                "ProcessID": result.pid,
-                "ArrivalTime": result.at,
-                "BurstTime": result.bt,
-                "StartTime": result.st,
-                "CompletionTime": result.ft,
-                "TurnaroundTime": result.tat,
-                "WaitingTime": result.wt,
-                "ResponseTime": result.rt
-            })
+            attribute_mapping = {
+                "ProcessID": ("process_id", "pid"),
+                "ArrivalTime": ("arrival_time", "at"),
+                "BurstTime": ("burst_time", "bt"),
+                "StartTime": ("start_time", "st"),
+                "CompletionTime": ("completion_time", "ft"),
+                "TurnaroundTime": ("turnaround_time", "tat"),
+                "WaitingTime": ("waiting_time", "wt"),
+                "ResponseTime": ("response_time", "rt")
+            }
+
+            row = {}
+            for column, attributes in attribute_mapping.items():
+                for attribute in attributes:
+                    if hasattr(result, attribute):
+                        row[column] = getattr(result, attribute)
+                        break
+                else:
+                    raise ValueError(
+                        f"Doi tuong ket qua thieu thuoc tinh cho cot {column}."
+                    )
+
+        rows.append(row)
 
     fieldnames = list(rows[0].keys())
 
@@ -135,12 +150,33 @@ def export_results_csv(results, file_path=None):
         if list(row.keys()) != fieldnames:
             raise ValueError("Cac dong ket qua khong cung cau truc.")
 
-    file_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(file_path, "w", encoding="utf-8-sig", newline="") as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(rows)
+        with open(
+            file_path,
+            "w",
+            encoding="utf-8-sig",
+            newline=""
+        ) as file:
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+
+    except PermissionError:
+        raise PermissionError(
+            f"Khong co quyen ghi file: {file_path}"
+        ) from None
+
+    except OSError as error:
+        raise OSError(
+            f"Khong the xuat file CSV: {error}"
+        ) from error
+
+    except csv.Error as error:
+        raise ValueError(
+            f"Loi dinh dang CSV: {error}"
+        ) from error
 
     return file_path
 
@@ -159,4 +195,3 @@ if __name__ == "__main__":
 
     except (ValueError, OSError) as error:
         print(f"Loi: {error}")
-
