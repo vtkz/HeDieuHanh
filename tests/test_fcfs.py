@@ -13,12 +13,13 @@ Chạy từ thư mục gốc dự án:
 import csv
 import os
 import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from main import Process, SchedulerEngine, CSVHandler  # noqa: E402
+from compat import Process, SchedulerEngine, CSVHandler  # noqa: E402
 
 DATA_DIR = os.path.join(ROOT, "data")
 

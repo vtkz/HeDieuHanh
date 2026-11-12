@@ -19,12 +19,13 @@ import csv
 import os
 import random
 import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from main import Process, SchedulerEngine  # noqa: E402
+from compat import Process, SchedulerEngine  # noqa: E402
 
 DATA_DIR = os.path.join(ROOT, "data")
 

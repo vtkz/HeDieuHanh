@@ -56,8 +56,9 @@ Ngoài phạm vi:
 | data/missing_column.csv | CSV thiếu cột BurstTime | TC08 |
 | data/non_numeric.csv | AT không phải số | TC09 |
 | data/empty_pid.csv | ProcessID trống | TC10 |
-| data/header_only.csv | Chỉ có dòng tiêu đề | TC11 |
+| data/header_only.csv | Chỉ có dòng tiêu đề | TC11 |   
 | data/perf_10.csv, perf_100.csv, perf_1000.csv, perf_5000.csv | Đo hiệu năng (sinh bằng script với seed cố định, tạo khi có code) | TC12 |
+| data/perf_200.csv | 200 tiến trình, kiểm thử giao diện với dữ liệu lớn (tạo bằng tests/make_big_csv.py) | IT14 |
 
 Yêu cầu định dạng file: dòng đầu tiên phải là dòng tiêu đề `ProcessID,ArrivalTime,BurstTime`, không có dòng trống ở đầu file.
 
@@ -85,7 +86,7 @@ Chi tiết dữ liệu, kết quả mong đợi và bảng số liệu nằm tro
 - Quy tắc phá hòa ở mục 4 đã được ghi trong `spec.md` mục 7, nhưng cần cả nhóm xác nhận. Nếu nhóm đổi quy tắc, TC04 và TC06 phải tính lại.
 - Tên "SJF không độc quyền": trong nhiều giáo trình tiếng Việt, thuật ngữ này chỉ SJF có ngắt (preemptive, còn gọi SRTF). Tuy nhiên `spec.md` mục 6 và 7 quy định tiến trình đang chạy không bị ngắt, nên toàn bộ test case trong tài liệu này tính theo quy định của `spec.md`. Cần TV1 hoặc giảng viên xác nhận; nếu đổi sang có ngắt thì TC01, TC04 và TC07 phải tính lại.
 - Chính sách báo lỗi dữ liệu (báo tất cả lỗi hay chỉ lỗi đầu tiên) cần TV4 xác nhận; ảnh hưởng đến kết quả mong đợi của TC03.
-- Các test case TC01 đến TC12 ở trạng thái BLOCKED cho đến khi thuật toán FCFS, SJF và phần đọc CSV được tích hợp.
+- Sau khi code được tích hợp, TC01 đến TC11 đã chạy: PASS. TC12 (đo hiệu năng), đang BLOCKED.
 - Kết quả chuẩn (tính tay) cần được TV2 đối chiếu với `test_oracle.csv`.
 
 ## 8. Kế hoạch kiểm tra hiệu năng
@@ -157,31 +158,38 @@ Cập nhật sau mỗi lần chạy. Trạng thái: PASS, FAIL hoặc BLOCKED.
 
 | Mã TC | Dữ liệu vào | Thuật toán | Kết quả mong đợi (tóm tắt) | Kết quả thực tế | Trạng thái | Người chạy | Ngày | Ghi chú |
 |---|---|---|---|---|---|---|---|---|
-| TC01 | normal.csv | FCFS | P1 -> P2 -> P3 -> P4 | Khớp bảng TC01 | PASS | TV5 | 27/10/2026 | Unit test |
-| TC01 | normal.csv | SJF | P1 -> P3 -> P2 -> P4 | Khớp bảng TC01 | PASS | TV5 | 30/10/2026 | Unit test |
-| TC02 | cpu_idle.csv | FCFS, SJF | P1 -> P2; Idle 0-2 và 5-8 | Khớp | PASS | TV5 | 27/10/2026 (FCFS), 30/10/2026 (SJF) | Unit test |
-| TC03 | invalid_data.csv | Đọc CSV | Từ chối, báo 3 lỗi, không crash | Báo ValueError (AT âm) | PASS | TV5 | 30/10/2026 | BUG01 đã sửa; chưa kiểm riêng BT = 0 và ProcessID trùng |
-| TC04 | same_arrival.csv | FCFS | P1 -> P2 -> P3 | Khớp bảng TC04 | PASS | TV5 | 27/10/2026 | Unit test |
-| TC04 | same_arrival.csv | SJF | P2 -> P3 -> P1 | Khớp bảng TC04 | PASS | TV5 | 30/10/2026 | Unit test |
-| TC05 | single_process.csv | FCFS | P1; CT = 5, TAT = 5, WT = 0, RT = 0 | | BLOCKED | | | Chờ code |
+| TC01 | normal.csv | FCFS | P1 -> P2 -> P3 -> P4 | Khớp bảng TC01 | PASS | TV5 | 27/10/2026 | Unit test; GUI 10/11/2026 PASS |
+| TC01 | normal.csv | SJF | P1 -> P3 -> P2 -> P4 | Khớp bảng TC01 | PASS | TV5 | 30/10/2026 | Unit test; GUI 10/11/2026 PASS |
+| TC02 | cpu_idle.csv | FCFS, SJF | P1 -> P2; Idle 0-2 và 5-8 | Khớp | PASS | TV5 | 27/10/2026 (FCFS), 30/10/2026 (SJF) | Unit test; GUI 10/11/2026 PASS |
+| TC03 | invalid_data.csv | Đọc CSV | Từ chối, báo lỗi, không crash | Hộp thoại "Dong 3: ArrivalTime phai >= 0." | PASS | TV5 | 10/11/2026 | Chỉ báo lỗi đầu tiên (BUG07). BT = 0 và trùng ProcessID kiểm riêng bằng integration test: PASS |
+| TC04 | same_arrival.csv | FCFS | P1 -> P2 -> P3 | Khớp bảng TC04 | PASS | TV5 | 27/10/2026 | Unit test; GUI 10/11/2026 PASS |
+| TC04 | same_arrival.csv | SJF | P2 -> P3 -> P1 | Khớp bảng TC04 | PASS | TV5 | 30/10/2026 | Unit test; GUI 10/11/2026 PASS |
+| TC05 | single_process.csv | FCFS | P1; CT = 5, TAT = 5, WT = 0, RT = 0 | Khớp (unit test và GUI EC07) | PASS | TV5 | 10/11/2026 | |
 | TC05 | single_process.csv | SJF | P1; CT = 5, TAT = 5, WT = 0, RT = 0 | Khớp | PASS | TV5 | 30/10/2026 | Unit test |
-| TC06 | equal_burst.csv | FCFS | P1 -> P2 -> P3 | | BLOCKED | | | Chờ code |
+| TC06 | equal_burst.csv | FCFS | P1 -> P2 -> P3 | Khớp | PASS | TV5 | 10/11/2026 | Unit test |
 | TC06 | equal_burst.csv | SJF | P2 -> P3 -> P1 | Khớp | PASS | TV5 | 30/10/2026 | Unit test |
-| TC07 | process_during_busy.csv | FCFS | P1 -> P2 -> P3 | | BLOCKED | | | Chờ code |
+| TC07 | process_during_busy.csv | FCFS | P1 -> P2 -> P3 | Khớp | PASS | TV5 | 10/11/2026 | Unit test |
 | TC07 | process_during_busy.csv | SJF | P1 -> P3 -> P2 | Khớp | PASS | TV5 | 30/10/2026 | Unit test |
-| TC08 | missing_column.csv | Đọc CSV | Báo thiếu cột BurstTime | Không báo lỗi | FAIL | TV5 | 30/10/2026 | BUG02 |
-| TC09 | non_numeric.csv | Đọc CSV | Báo AT không phải số | Báo ValueError | PASS | TV5 | 30/10/2026 | BUG01 đã sửa ||
-| TC10 | empty_pid.csv | Đọc CSV | Báo ProcessID trống | Không báo lỗi | FAIL | TV5 | 30/10/2026 | BUG02 |
-| TC11 | header_only.csv | Đọc CSV | Báo không có tiến trình | | BLOCKED | | | Chờ code |
-| TC12 | perf_*.csv | FCFS, SJF | Hoàn thành, ghi thời gian | | BLOCKED | | | Chờ code và dữ liệu |
+| TC08 | missing_column.csv | Đọc CSV | Báo thiếu cột | Hộp thoại "Tieu de CSV phai la: ProcessID,ArrivalTime,BurstTime." | PASS | TV5 | 10/11/2026 | BUG02 đã sửa ở nhánh diem; xem BUG08 |
+| TC09 | non_numeric.csv | Đọc CSV | Báo AT không phải số | Hộp thoại "Dong 3: ArrivalTime va BurstTime phai la so nguyen." | PASS | TV5 | 10/11/2026 | BUG01 đã sửa; xem BUG08 |
+| TC10 | empty_pid.csv | Đọc CSV | Báo ProcessID trống | Hộp thoại "Dong 3: ProcessID khong duoc de trong." | PASS | TV5 | 10/11/2026 | BUG02 đã sửa ở nhánh diem |
+| TC11 | header_only.csv | Đọc CSV | Báo không có tiến trình | Hộp thoại "File CSV khong co tien trinh hop le." | PASS | TV5 | 10/11/2026 | |
+| TC12 | perf_*.csv | FCFS, SJF | Hoàn thành, ghi thời gian | | BLOCKED | | | Đã có tests/stress_test.py; chờ chạy trên máy TV5 |
 
 ## 14. Bảng ghi lỗi
 
 | Mã lỗi | Test case | Mô tả lỗi | Mức độ | Người phụ trách sửa | Trạng thái | Kết quả kiểm tra lại |
 |---|---|---|---|---|---|---|
 | BUG01 | TC03, TC09 | CSVHandler đọc cột `Arrival_Time` và `Burst_Time`, trong khi spec dùng `ArrivalTime` và `BurstTime`; file CSV theo spec bị bỏ qua mọi dòng mà không báo lỗi | Cao | TV1 | Đã sửa | TC03, TC09 PASS ngày 30/10/2026 |
-| BUG02 | TC08, TC10 | Thiếu cột hoặc ProcessID trống: code `continue` bỏ qua dòng thay vì báo lỗi (spec mục 9 yêu cầu từ chối) | Cao | TV1 | Mở | TC08, TC10 vẫn FAIL ngày 30/10/2026 |
-| BUG03 | TC03 | Không kiểm tra ProcessID trùng (spec mục 9) | Trung bình | TV1 | Mở (chưa xác minh) | TC03 PASS vì lỗi AT âm được bắt trước; ProcessID trùng chưa kiểm riêng |
+| BUG02 | TC08, TC10 | Thiếu cột hoặc ProcessID trống: code `continue` bỏ qua dòng thay vì báo lỗi (spec mục 9 yêu cầu từ chối) | Cao | TV1 | Đã sửa ở nhánh diem, chờ merge | TC08, TC10 PASS trên GUI ngày 10/11/2026; main.py của nhánh test và testnhungkhongviettat vẫn lỗi |
+| BUG03 | TC03 | Không kiểm tra ProcessID trùng (spec mục 9) | Trung bình | TV1 | Đã sửa ở nhánh diem, chờ merge | Integration test (bad_duplicate_pid.csv, bad_zero_bt.csv) PASS ngày 10/11/2026 |
+| BUG04 | Tích hợp | Có 3 kiểu main.py khác tên thuộc tính và hàm (pid/st/ft; finish_time; run_first_come_first_served). Chỉ bản nhánh diem khớp gui.py trên main; dùng bản khác thì GUI báo AttributeError khi bấm Chạy | Cao | TV1, TV2, TV4 | Mở | Cần chốt một API trước khi merge |
+| BUG05 | IT11 | Chạy mô phỏng, thêm tiến trình mới rồi bấm Xuất CSV: file xuất thiếu tiến trình mới (kết quả và Gantt cũ không bị xóa) | Cao | TV3 | Mở | Xác nhận bằng ảnh và file gui01_test.csv ngày 10/11/2026 |
+| BUG06 | IT12 | Nút Xóa danh sách và Nhập CSV không xóa biểu đồ Gantt cũ, bảng và Gantt lệch nhau | Trung bình | TV3 | Mở | Xác nhận bằng ảnh ngày 10/11/2026 |
+| BUG07 | TC03 | Nhập CSV chỉ báo lỗi dòng đầu tiên, không liệt kê đủ lỗi | Thấp | TV4 | Mở | Cần TV4 xác nhận chính sách báo lỗi (mục 7) |
+| BUG08 | TC03, TC08, TC09, TC10, TC11 | Thông báo lỗi CSV không có dấu tiếng Việt | Thấp | TV4 | Mở | |
+| BUG09 | IT14 | Với 200 tiến trình: nhãn Gantt chồng thành vệt đen, hộp thoại kết quả liệt kê toàn bộ Gantt quá lớn | Thấp | TV3 | Mở | Số liệu đúng, chỉ lỗi hiển thị |
+| BUG10 | IT13 | Thu nhỏ cửa sổ: Gantt bị cắt, không co giãn, không có thanh cuộn ngang; tiêu đề cột bị cắt | Trung bình | TV3 | Mở | Xác nhận bằng ảnh ngày 10/11/2026 |
 
 ## 15. Kết quả Unit Test FCFS 
 
@@ -189,7 +197,7 @@ File test: `tests/test_fcfs.py`
 
 Lệnh chạy: `python -m unittest discover -s tests -v`
 
-Tổng: 12 test, 10 PASS, 2 FAIL.
+Tổng: 12 test, 12 PASS, 0 FAIL (trước đó 10 PASS, 2 FAIL do BUG02).
 
 | Test | Nội dung | Kết quả mong đợi | Kết quả thực tế | Trạng thái |
 |---|---|---|---|---|
@@ -200,8 +208,8 @@ Tổng: 12 test, 10 PASS, 2 FAIL.
 | test_oracle_Test2_Idle | Oracle của TV2 | Khớp oracle | Khớp | PASS |
 | test_tc03_at_am_bt_bang_0_pid_trung | invalid_data.csv | Báo lỗi ValueError | Báo ValueError | PASS (BUG01 đã sửa) |
 | test_tc09_at_khong_phai_so | non_numeric.csv | Báo lỗi ValueError | Báo ValueError | PASS (BUG01 đã sửa) |
-| test_tc08_thieu_cot | missing_column.csv | Báo lỗi ValueError | Không báo lỗi | FAIL (BUG02) |
-| test_tc10_pid_trong | empty_pid.csv | Báo lỗi ValueError | Không báo lỗi | FAIL (BUG02) |
+| test_tc08_thieu_cot | missing_column.csv | Báo lỗi ValueError | Báo ValueError | PASS |
+| test_tc10_pid_trong | empty_pid.csv | Báo lỗi ValueError | Báo ValueError | PASS |
 
 Các test oracle chạy 2 lần (đầu vào giữ nguyên và đảo ngược thứ tự), cả hai đều đạt.
 
@@ -235,4 +243,139 @@ Tổng: 22 test, 22 PASS, 0 FAIL.
 | Test | Nội dung | Trạng thái |
 |---|---|---|
 | test_tc01, test_tc02, test_tc04, test_tc05, test_tc06, test_tc07 | Dữ liệu trong `data/` so với bảng SJF trong `test_cases.md` | PASS |
-| test_oracle_Test1_Basic, Test2_Idle, Test3_TieBreak | Đối chiếu oracle của TV2 | PASS |   
+| test_oracle_Test1_Basic, Test2_Idle, Test3_TieBreak | Đối chiếu oracle của TV2 | PASS |
+
+## 17. KẾ HOẠCH KIỂM THỬ  – KIỂM THỬ TÍCH HỢP
+### 17.1. Mục tiêu kiểm thử tích hợp
+
+- Kiểm tra sự kết nối giữa giao diện GUI và bộ xử lý thuật toán FCFS, SJF.
+- Kiểm tra dữ liệu nhập thủ công được truyền chính xác đến thuật toán.
+- Kiểm tra chức năng Import CSV và Export CSV trên giao diện.
+- Kiểm tra tính chính xác của bảng kết quả và biểu đồ Gantt.
+- Kiểm tra khả năng xử lý dữ liệu đầu vào không hợp lệ.
+- Đảm bảo giao diện hoạt động ổn định khi người dùng thao tác.
+
+### 17.2. Danh sách kiểm thử tích hợp
+
+| Mã | Nội dung kiểm thử | Kết quả mong đợi | Trạng thái | Ghi chú |
+|---|---|---|---|---|
+| IT01 | Khởi động GUI | Giao diện hiển thị bình thường | PASS | 10/11/2026 |
+| IT02 | Chạy FCFS trên GUI | Kết quả đúng với Test Oracle | PASS | Khớp TC01, TC02, TC04; 200 tiến trình khớp mô phỏng độc lập |
+| IT03 | Chạy SJF trên GUI | Kết quả đúng với Test Oracle | PASS | Như IT02 |
+| IT04 | Nhập dữ liệu thủ công | Tiến trình được thêm chính xác | PASS | EC02, EC07 |
+| IT05 | Import file normal.csv | Dữ liệu được hiển thị đầy đủ | PASS | "Đã nhập 4 tiến trình từ normal.csv" |
+| IT06 | Export kết quả CSV | File xuất đúng cấu trúc và dữ liệu | PASS | Xuất ngay sau khi chạy: đúng; trường hợp khác xem IT11 |
+| IT07 | Kiểm tra biểu đồ Gantt | Thứ tự và thời gian khớp thuật toán | PASS | Có khối IDLE (EC09) |
+| IT08 | Import CSV sai định dạng | Hiển thị thông báo lỗi, không crash | PASS | TC03, TC08, TC09, TC10, TC11; dữ liệu cũ không mất |
+| IT09 | Chạy với dữ liệu rỗng | Xử lý an toàn, không crash | PASS | EC06 |
+| IT10 | Chuyển đổi giữa FCFS và SJF | Kết quả được cập nhật chính xác | PASS | Chạy FCFS, SJF, FCFS: kết quả không dính |
+| IT11 | Thêm tiến trình sau khi chạy rồi Export | File xuất có đủ tiến trình mới | FAIL | BUG05 |
+| IT12 | Xóa danh sách hoặc Import CSV mới sau khi chạy | Gantt cũ bị xóa | FAIL | BUG06 |
+| IT13 | Thu nhỏ cửa sổ | Gantt và bảng co giãn, không bị cắt | FAIL | BUG10 |
+| IT14 | Nạp perf_200.csv (200 tiến trình) | Không treo, số liệu đúng, Gantt đọc được | PASS | Số liệu đúng; nhãn Gantt chồng nhau (BUG09) |
+
+### 17.3. Kiểm thử giao diện người dùng (UI Testing)
+
+- Kiểm tra các nút chức năng có hoạt động đúng không.
+- Kiểm tra các ô nhập ProcessID, ArrivalTime và BurstTime.
+- Kiểm tra dữ liệu sau khi thêm hoặc xóa tiến trình.
+- Kiểm tra bảng kết quả sau khi chạy thuật toán.
+- Kiểm tra biểu đồ Gantt hiển thị đúng thứ tự tiến trình.
+- Kiểm tra thông báo lỗi khi người dùng nhập dữ liệu không hợp lệ.
+- Kiểm tra giao diện sau khi chuyển đổi giữa FCFS và SJF.
+
+### 17.4. Kiểm thử dữ liệu đầu vào biên (Edge Input Cases)
+
+| Mã | Trường hợp kiểm thử | Kết quả mong đợi | Kết quả thực tế | Trạng thái |
+|---|---|---|---|---|
+| EC01 | Không nhập ProcessID | Hiển thị thông báo lỗi | "Vui lòng nhập đầy đủ ProcessID, ArrivalTime và BurstTime." | PASS |
+| EC02 | Nhập ProcessID trùng | Từ chối dữ liệu | "ProcessID 'P1' đã tồn tại." | PASS |
+| EC03 | ArrivalTime âm | Hiển thị thông báo lỗi | "ArrivalTime phải lớn hơn hoặc bằng 0." | PASS |
+| EC04 | BurstTime bằng 0 | Hiển thị thông báo lỗi | "BurstTime phải lớn hơn 0." | PASS |
+| EC05 | Nhập dữ liệu không phải số | Hiển thị thông báo lỗi | "ArrivalTime và BurstTime phải là số nguyên." (thử `abc` và `1.25`) | PASS |
+| EC06 | Không nhập tiến trình nào | Không crash ứng dụng | "Vui lòng thêm tiến trình hoặc nhập file CSV trước." | PASS |
+| EC07 | Chỉ có một tiến trình | Hiển thị kết quả chính xác | FCFS và SJF: CT = 5, TAT = 5, WT = 0, RT = 0 | PASS |
+| EC08 | Nhiều tiến trình đến cùng lúc | Xử lý đúng quy tắc Tie-break | FCFS: P1, P2, P3; SJF: P2, P3, P1 | PASS |
+| EC09 | Có khoảng thời gian CPU Idle | Gantt Chart hiển thị khoảng Idle | Hai khối IDLE ở 0-2 và 5-8 | PASS |
+| EC10 | File CSV thiếu cột dữ liệu | Hiển thị thông báo lỗi | "Tieu de CSV phai la: ProcessID,ArrivalTime,BurstTime." | PASS |
+
+### 17.5. Phương pháp đánh giá
+
+- PASS: Chức năng hoạt động đúng với kết quả mong đợi.
+- FAIL: Chức năng hoạt động sai, hiển thị kết quả không chính xác hoặc phát sinh lỗi.
+- BLOCKED: Chưa thể thực hiện kiểm thử do chức năng chưa được tích hợp hoặc chưa sẵn sàng.
+
+Mỗi lỗi phát hiện cần được ghi nhận vào mục 14 – Bảng ghi lỗi và chuyển cho thành viên phụ trách để xử lý.
+
+### 17.6. Kết quả kiểm thử
+
+- Integration test tự động: `python -m unittest discover -s tests -v`, 83 test OK, 2 expected failures (BUG05, BUG06 còn tồn tại).
+- Kiểm thử tích hợp IT01 đến IT14: 11 PASS, 3 FAIL (IT11, IT12, IT13).
+- Edge input EC01 đến EC10: 10 PASS.
+- Lỗi mới: BUG04 đến BUG10 (2 lỗi mức Cao: BUG04, BUG05).
+- Kết luận: nghiệm thu chức năng (TC01 đến TC11) đạt. Còn 4 lỗi mở chờ nhóm sửa (BUG04, BUG05, BUG06, BUG10); TC12 ở giai đoạn sau.
+
+### 17.7. Minh chứng kiểm thử (thư mục docs/minh_chung)
+
+#### a. Kiểm thử tự động và khởi động giao diện
+
+| Mã | Nội dung | Ảnh |
+|---|---|---|
+| Unit và Integration | `python -m unittest discover -s tests -v`: 83 test OK, 2 expected failures (BUG05, BUG06) | ![](minh_chung/unittest_83_ok.png) |
+| IT01 | Khởi động giao diện | ![](minh_chung/IT01_khoi_dong_GUI.png) |
+
+#### b. Nhập dữ liệu biên (EC01 đến EC10)
+
+| Mã | Nội dung | Ảnh |
+|---|---|---|
+| EC01 | Không nhập ProcessID | ![](minh_chung/EC01_thieu_du_lieu.png) |
+| EC02 | ProcessID trùng | ![](minh_chung/EC02_pid_trung.png) |
+| EC03 | ArrivalTime âm | ![](minh_chung/EC03_at_am.png) |
+| EC04 | BurstTime bằng 0 | ![](minh_chung/EC04_bt_bang_0.png) |
+| EC05 | ArrivalTime là chữ `abc` | ![](minh_chung/EC05_at_abc.png) |
+| EC05 | ArrivalTime là số thực `1.25` | ![](minh_chung/EC05_at_so_thuc.png) |
+| EC06 | Chạy khi chưa có tiến trình | ![](minh_chung/EC06_du_lieu_rong.png) |
+| EC07 | Một tiến trình, FCFS | ![](minh_chung/EC07_FCFS.png) |
+| EC07 | Một tiến trình, SJF | ![](minh_chung/EC07_SJF.png) |
+| EC08 | Đến cùng lúc, FCFS (P1, P2, P3) | ![](minh_chung/EC08_FCFS.png) |
+| EC08 | Đến cùng lúc, SJF (P2, P3, P1) | ![](minh_chung/EC08_SJF.png) |
+| EC09 | CPU Idle, FCFS | ![](minh_chung/EC09_FCFS_idle.png) |
+| EC09 | CPU Idle, SJF | ![](minh_chung/EC09_SJF_idle.png) |
+| EC10 | CSV thiếu cột, dữ liệu cũ vẫn còn | ![](minh_chung/EC10_thieu_cot_giu_du_lieu_cu.png) |
+
+#### c. Dữ liệu CSV của nhóm (TC01, TC03, TC09, TC10, TC11)
+
+| Mã | Nội dung | Ảnh |
+|---|---|---|
+| TC01 | normal.csv, FCFS: P1, P2, P3, P4 | ![](minh_chung/TC01_FCFS.png) |
+| TC01 | normal.csv, SJF: P1, P3, P2, P4 | ![](minh_chung/TC01_SJF.png) |
+| TC03 | invalid_data.csv: chỉ báo lỗi dòng đầu (BUG07, BUG08) | ![](minh_chung/TC03_invalid_data.png) |
+| TC09 | non_numeric.csv | ![](minh_chung/TC09_non_numeric.png) |
+| TC10 | empty_pid.csv | ![](minh_chung/TC10_empty_pid.png) |
+| TC11 | header_only.csv | ![](minh_chung/TC11_header_only.png) |
+
+#### d. Xuất CSV và chạy lặp (IT06, IT10, EXP)
+
+| Mã | Nội dung | Ảnh |
+|---|---|---|
+| EXP-3 | Xuất khi chưa chạy mô phỏng: có cảnh báo (đồng thời thấy Gantt cũ còn nguyên, BUG06) | ![](minh_chung/EXP3_xuat_khi_chua_chay.png) |
+| EXP-4 | Nhập lại file vừa xuất bị từ chối vì dòng đầu là "Scheduling Report" (chỉ ghi nhận, không phải lỗi) | ![](minh_chung/EXP4_nhap_lai_file_xuat_bi_tu_choi.png) |
+| IT10 | 200 tiến trình, FCFS lần 1: chờ 971.88, quay vòng 983.52 | ![](minh_chung/UIA_1_FCFS_200.png) |
+| IT10 | 200 tiến trình, SJF: chờ 648.24, quay vòng 659.87 | ![](minh_chung/UIA_2_SJF_200.png) |
+| IT10 | 200 tiến trình, FCFS lần 3: kết quả giống lần 1 | ![](minh_chung/UIA_3_FCFS_200.png) |
+
+#### e. Lỗi đã phát hiện
+
+| Mã lỗi | Mô tả | Ảnh |
+|---|---|---|
+| BUG05 | Bước 1: sau khi chạy, thêm P3; bảng có P3 nhưng Gantt cũ còn nguyên | ![](minh_chung/BUG05_buoc1_them_P3_gantt_cu_con.png) |
+| BUG05 | Bước 2: file `gui01_test.csv` xuất ra chỉ có P1, P2, thiếu P3 | ![](minh_chung/BUG05_buoc2_file_xuat_thieu_P3.png) |
+| BUG06 | Sau Xóa danh sách, bảng trống nhưng Gantt cũ vẫn còn | ![](minh_chung/BUG06_xoa_danh_sach_gantt_cu_con.png) |
+| BUG09 | 200 tiến trình: nhãn Gantt chồng thành vệt, hộp thoại kết quả quá lớn | ![](minh_chung/BUG09_200_tien_trinh_SJF.png) |
+| BUG10 | Trước khi thu nhỏ cửa sổ | ![](minh_chung/BUG10_truoc_khi_thu_nho.png) |
+| BUG10 | Sau khi thu nhỏ: Gantt bị cắt, không có thanh cuộn | ![](minh_chung/BUG10_sau_khi_thu_nho.png) |
+
+### 17.8. Người thực hiện
+
+Phạm Minh Duy: Kỹ sư kiểm thử (QA/QC) và Hiệu năng.
+
