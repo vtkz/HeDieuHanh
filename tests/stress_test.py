@@ -1,9 +1,9 @@
-"""Stress Test + đo hiệu năng FCFS / SJF Non-preemptive (Giai đoạn 6, TV5 - Duy).
+"""Stress Test + đo hiệu năng FCFS / SJF Non-preemptive
 
 Chạy từ thư mục gốc dự án:
     python test/stress_test.py                       # N = 100..10000, mặc định
     python test/stress_test.py --sizes 100 1000 5000 --repeats 5 --seed 42
-    python test/stress_test.py --max-n 3000          # máy yếu: giới hạn N
+    python test/stress_test.py --max-n 3000          
     python test/stress_test.py --no-plot
 
 Mỗi lần chạy: sinh dữ liệu ngẫu nhiên (cố định seed -> tái lập được), chạy từng
@@ -100,10 +100,14 @@ def measure(fn, rows, repeats):
     _, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
     rss_after = rss_mb()
+    med_t, med_c = statistics.median(times), statistics.median(cpus)
     return {
-        "time_ms": statistics.median(times),
+        "time_ms": med_t,
+        "time_mean_ms": statistics.fmean(times),
         "time_min_ms": min(times),
-        "cpu_ms": statistics.median(cpus),
+        "runs_ms": ";".join(f"{t:.3f}" for t in times),
+        "cpu_ms": med_c,
+        "cpu_pct": (100.0 * med_c / med_t) if med_t > 0 else float("nan"),
         "py_peak_mb": peak / 1e6,
         "rss_mb": rss_after,
         "rss_delta_mb": rss_after - rss_before,
@@ -176,6 +180,31 @@ def main():
                 k = slope(rs[0]["n"], rs[0]["time_ms"], rs[-1]["n"], rs[-1]["time_ms"])
                 note = "≈ tuyến tính / N log N" if k < 1.4 else ("≈ bậc hai" if k > 1.7 else "giữa N log N và N²")
                 print(f"| {scen} | {algo} | {k:.2f} | {note} |")
+
+    # ---- bảng đúng định dạng mục 8 của test_plan.md ----
+    scen8 = "random" if "random" in args.scenarios else args.scenarios[0]
+    print(f"\n### Bảng đo cho mục 8 test_plan.md (kịch bản {scen8}, đơn vị ms)\n")
+    print("| Số tiến trình | Thuật toán | Lần 1 (ms) | Lần 2 (ms) | Lần 3 (ms) | Lần 4 (ms) | Lần 5 (ms) | Trung bình (ms) |")
+    print("|---:|---|---:|---:|---:|---:|---:|---:|")
+    for n in sizes:
+        for algo in ALGOS:
+            r = next(x for x in records if x["scenario"] == scen8 and x["n"] == n and x["algo"] == algo)
+            runs = [f"{float(v):.2f}" for v in r["runs_ms"].split(";")][:5]
+            runs += [""] * (5 - len(runs))
+            print(f"| {n} | {algo} | " + " | ".join(runs) + f" | {r['time_mean_ms']:.2f} |")
+
+    # ---- tài nguyên CPU / RAM ----
+    print("\n### Mức chiếm dụng CPU và RAM\n")
+    print("| Kịch bản | N | Thuật toán | Thời gian CPU (ms) | CPU 1 nhân (%) | RAM Python đỉnh (MB) | RSS tiến trình (MB) |")
+    print("|---|---:|---|---:|---:|---:|---:|")
+    big = max(sizes)
+    rows = [x for x in records if x["scenario"] == scen8 or x["n"] == big]
+    for r in sorted(rows, key=lambda x: (x["scenario"] != scen8, x["scenario"], x["n"], x["algo"])):
+        print(f"| {r['scenario']} | {r['n']} | {r['algo']} | {r['cpu_ms']:.2f} | {r['cpu_pct']:.0f} | "
+              f"{r['py_peak_mb']:.2f} | {r['rss_mb']:.1f} |")
+    ncpu = os.cpu_count() or 1
+    print(f"\n(Ghi chú: thuật toán chạy trên 1 luồng nên CPU 1 nhân gần 100%, tương đương khoảng "
+          f"{100.0 / ncpu:.1f}% tổng CPU của máy có {ncpu} luồng logic.)")
 
     print(f"\nĐã ghi {csv_path}")
     if failures:

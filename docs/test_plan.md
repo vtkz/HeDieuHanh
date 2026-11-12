@@ -57,7 +57,7 @@ Ngoài phạm vi:
 | data/non_numeric.csv | AT không phải số | TC09 |
 | data/empty_pid.csv | ProcessID trống | TC10 |
 | data/header_only.csv | Chỉ có dòng tiêu đề | TC11 |   
-| data/perf_10.csv, perf_100.csv, perf_1000.csv, perf_5000.csv | Đo hiệu năng (sinh bằng script với seed cố định, tạo khi có code) | TC12 |
+| (sinh tự động trong bộ nhớ) | Dữ liệu ngẫu nhiên N = 10 đến 10.000 do `tests/stress_test.py` sinh với seed 2024, ba kịch bản: random, simultaneous, sparse; không lưu thành file | TC12 |
 | data/perf_200.csv | 200 tiến trình, kiểm thử giao diện với dữ liệu lớn (tạo bằng tests/make_big_csv.py) | IT14 |
 
 Yêu cầu định dạng file: dòng đầu tiên phải là dòng tiêu đề `ProcessID,ArrivalTime,BurstTime`, không có dòng trống ở đầu file.
@@ -86,32 +86,89 @@ Chi tiết dữ liệu, kết quả mong đợi và bảng số liệu nằm tro
 - Quy tắc phá hòa ở mục 4 đã được ghi trong `spec.md` mục 7, nhưng cần cả nhóm xác nhận. Nếu nhóm đổi quy tắc, TC04 và TC06 phải tính lại.
 - Tên "SJF không độc quyền": trong nhiều giáo trình tiếng Việt, thuật ngữ này chỉ SJF có ngắt (preemptive, còn gọi SRTF). Tuy nhiên `spec.md` mục 6 và 7 quy định tiến trình đang chạy không bị ngắt, nên toàn bộ test case trong tài liệu này tính theo quy định của `spec.md`. Cần TV1 hoặc giảng viên xác nhận; nếu đổi sang có ngắt thì TC01, TC04 và TC07 phải tính lại.
 - Chính sách báo lỗi dữ liệu (báo tất cả lỗi hay chỉ lỗi đầu tiên) cần TV4 xác nhận; ảnh hưởng đến kết quả mong đợi của TC03.
-- Sau khi code được tích hợp, TC01 đến TC11 đã chạy: PASS. TC12 (đo hiệu năng), đang BLOCKED.
+- Sau khi code được tích hợp, TC01 đến TC11 đã chạy: PASS. TC12 (đo hiệu năng) đã chạy ngày 12/11/2026: PASS (xem mục 8).
 - Kết quả chuẩn (tính tay) cần được TV2 đối chiếu với `test_oracle.csv`.
 
 ## 8. Kế hoạch kiểm tra hiệu năng
 
 - Sử dụng cùng bộ dữ liệu khi so sánh FCFS và SJF.
-- Dự kiến thử với 10, 100, 1000 và 5000 tiến trình.
+- Thử với 10, 100, 1000, 5000 và 10.000 tiến trình.
 - Dữ liệu sinh bằng script với seed cố định để có thể tái lập kết quả.
 - Dùng time.perf_counter() để đo thời gian thực thi.
-- Chạy thử một lần trước khi đo và đo ít nhất 5 lần cho mỗi cấu hình.
-- Tính thời gian trung bình theo mili giây.
+- Mỗi cấu hình đo 5 lần liên tiếp, không loại bỏ lần đo đầu (lần 1 thường cao hơn do khởi động).
 - Tách thời gian thuật toán khỏi thời gian đọc CSV và vẽ giao diện.
 - Ghi rõ cấu hình máy đo (CPU, RAM, phiên bản Python).
 
-Bảng ghi kết quả đo (điền khi có code):
+Bảng ghi kết quả đo (kịch bản random, mỗi cấu hình đo 5 lần):
+
+Cấu hình máy: AMD Ryzen 7 8745H (8 nhân, 16 luồng logic), RAM 16 GB DDR5, Windows, Python 3.13.8, psutil 7.2.2.
+
+Lệnh chạy: `python tests/stress_test.py --sizes 10 100 1000 5000 10000 --repeats 5` (seed 2024). 
+
+Kết quả thô: `docs/stress_results.csv`.
 
 | Số tiến trình | Thuật toán | Lần 1 (ms) | Lần 2 (ms) | Lần 3 (ms) | Lần 4 (ms) | Lần 5 (ms) | Trung bình (ms) |
 |---:|---|---:|---:|---:|---:|---:|---:|
-| 10 | FCFS | | | | | | |
-| 10 | SJF | | | | | | |
-| 100 | FCFS | | | | | | |
-| 100 | SJF | | | | | | |
-| 1000 | FCFS | | | | | | |
-| 1000 | SJF | | | | | | |
-| 5000 | FCFS | | | | | | |
-| 5000 | SJF | | | | | | |
+| 10 | FCFS | 0.02 | 0.02 | 0.01 | 0.01 | 0.01 | 0.01 |
+| 10 | SJF | 0.06 | 0.04 | 0.02 | 0.02 | 0.02 | 0.03 |
+| 100 | FCFS | 0.10 | 0.09 | 0.08 | 0.08 | 0.08 | 0.08 |
+| 100 | SJF | 0.79 | 0.75 | 0.69 | 0.93 | 0.95 | 0.82 |
+| 1000 | FCFS | 1.08 | 1.20 | 0.96 | 1.01 | 1.14 | 1.08 |
+| 1000 | SJF | 54.80 | 53.00 | 53.10 | 53.35 | 52.48 | 53.35 |
+| 5000 | FCFS | 8.36 | 6.42 | 7.15 | 6.03 | 6.37 | 6.87 |
+| 5000 | SJF | 1494.37 | 1434.67 | 1368.95 | 1365.58 | 1345.50 | 1401.81 |
+| 10000 | FCFS | 17.38 | 17.94 | 17.70 | 15.03 | 13.55 | 16.32 |
+| 10000 | SJF | 5657.38 | 5517.99 | 5525.51 | 5456.14 | 5664.72 | 5564.35 |
+
+### 8.1. So sánh ba kịch bản ở N = 10.000 (trung vị, ms)
+
+| Kịch bản | FCFS (ms) | SJF (ms) | SJF chậm hơn FCFS |
+|---|---:|---:|---:|
+| random | 17.38 | 5525.51 | khoảng 318 lần |
+| simultaneous (mọi tiến trình đến lúc 0) | 10.62 | 9235.69 | khoảng 870 lần |
+| sparse (nhiều đoạn Idle) | 20.43 | 6524.39 | khoảng 319 lần |
+
+### 8.2. Hệ số mũ thực nghiệm k (thời gian ≈ N^k)
+
+| Kịch bản | Thuật toán | k (N từ 10 đến 10.000) | k (N từ 1.000 đến 10.000) |
+|---|---|---:|---:|
+| random | FCFS | 1.08 | 1.20 |
+| random | SJF | 1.79 | 2.02 |
+| simultaneous | FCFS | 0.97 | 0.98 |
+| simultaneous | SJF | 1.81 | 1.91 |
+| sparse | FCFS | 1.01 | 1.18 |
+| sparse | SJF | 1.73 | 2.04 |
+
+### 8.3. Mức chiếm dụng CPU và RAM
+
+| Kịch bản | N | Thuật toán | Thời gian CPU (ms) | CPU 1 nhân (%) | RAM Python đỉnh (MB) | RSS tiến trình (MB) |
+|---|---:|---|---:|---:|---:|---:|
+| random | 1000 | FCFS | 0.00 | 0 | 0.25 | 68.0 |
+| random | 1000 | SJF | 46.88 | 88 | 0.22 | 68.3 |
+| random | 5000 | FCFS | 0.00 | 0 | 1.54 | 72.7 |
+| random | 5000 | SJF | 1343.75 | 98 | 1.32 | 73.8 |
+| random | 10000 | FCFS | 15.62 | 90 | 3.17 | 79.5 |
+| random | 10000 | SJF | 5500.00 | 100 | 2.76 | 80.0 |
+| simultaneous | 10000 | FCFS | 15.62 | 147 | 3.08 | 79.0 |
+| simultaneous | 10000 | SJF | 9171.88 | 99 | 3.08 | 81.7 |
+| sparse | 10000 | FCFS | 15.62 | 76 | 3.24 | 80.6 |
+| sparse | 10000 | SJF | 6500.00 | 100 | 3.13 | 80.6 |
+
+### 8.4. Nhận xét
+
+- Tính đúng: 30/30 cấu hình (3 kịch bản, 5 mức N, 2 thuật toán) hoàn thành và kết quả đúng (kiểm tra CT = ST + BT, TAT, WT, Gantt liên tục, tổng thời gian chạy bằng tổng BT).
+- FCFS tăng gần tuyến tính (k từ 0,98 đến 1,20, phù hợp N log N do bước sắp xếp): 10.000 tiến trình chạy dưới 21 ms.
+- SJF tăng gần bậc hai (k từ 1,91 đến 2,04) vì mỗi lần chọn tiến trình phải duyệt danh sách chờ: 10.000 tiến trình mất 5,5 đến 9,2 giây. Kịch bản simultaneous là xấu nhất vì hàng đợi sẵn sàng dài nhất.
+- RAM: đỉnh bộ nhớ Python khoảng 3,1 đến 3,2 MB ở 10.000 tiến trình (khoảng 0,3 KB mỗi tiến trình), tăng tuyến tính theo N; SJF dùng RAM tương đương FCFS. RSS tiến trình tăng từ khoảng 66,7 MB lên khoảng 80 MB.
+- CPU: thuật toán chạy trên một luồng nên SJF ở N lớn chiếm 88 đến 100% một nhân, tương đương khoảng 6,2% tổng CPU của máy 16 luồng. Giá trị CPU của FCFS và của N nhỏ không dùng làm số đo vì Windows chỉ đo thời gian CPU theo bước khoảng 15,6 ms (nên xuất hiện 0 hoặc 147%).
+- Độ nhiễu: Lần 1 thường cao hơn các lần sau do khởi động; với FCFS ở N lớn thời gian chỉ vài chục ms nên dao động khoảng 15% giữa các lần đo.
+- Đề xuất (PERF01): SJF có thể dùng min-heap theo (BT, AT, ProcessID) để giảm xuống O(N log N). Với 10.000 tiến trình, bấm Chạy SJF trên giao diện nhiều khả năng đứng hình vài giây.
+
+![](minh_chung/TC12_stress_30_dong_OK.png)
+
+![](minh_chung/TC12_stress_bang_muc8.png)
+
+![](minh_chung/TC12_stress_benchmark.png)
 
 ## 9. Đối chiếu kết quả
 
@@ -140,7 +197,7 @@ Bảng ghi kết quả đo (điền khi có code):
 - Kế hoạch kiểm thử (tài liệu này).
 - Danh sách test case (`docs/test_cases.md`).
 - Bộ dữ liệu CSV mẫu (thư mục `data/`).
-- Mã nguồn Unit Test.
+- Mã nguồn Unit Test, Integration Test và Stress Test (thư mục `tests/`), kết quả đo thô `docs/stress_results.csv`.
 - Kết quả kiểm thử (mục 13).
 - Bảng đo hiệu năng (mục 8).
 - Báo cáo lỗi (mục 14) và minh chứng chạy chương trình.
@@ -174,7 +231,7 @@ Cập nhật sau mỗi lần chạy. Trạng thái: PASS, FAIL hoặc BLOCKED.
 | TC09 | non_numeric.csv | Đọc CSV | Báo AT không phải số | Hộp thoại "Dong 3: ArrivalTime va BurstTime phai la so nguyen." | PASS | TV5 | 10/11/2026 | BUG01 đã sửa; xem BUG08 |
 | TC10 | empty_pid.csv | Đọc CSV | Báo ProcessID trống | Hộp thoại "Dong 3: ProcessID khong duoc de trong." | PASS | TV5 | 10/11/2026 | BUG02 đã sửa ở nhánh diem |
 | TC11 | header_only.csv | Đọc CSV | Báo không có tiến trình | Hộp thoại "File CSV khong co tien trinh hop le." | PASS | TV5 | 10/11/2026 | |
-| TC12 | perf_*.csv | FCFS, SJF | Hoàn thành, ghi thời gian | | BLOCKED | | | Đã có tests/stress_test.py; chờ chạy trên máy TV5 |
+| TC12 | stress_test.py (random, simultaneous, sparse; N = 10 đến 10.000) | FCFS, SJF | Hoàn thành, ghi thời gian | 30/30 cấu hình hoàn thành, kết quả đúng; N = 10.000: FCFS 17.38 ms, SJF 5525.51 ms (random) | PASS | TV5 | 12/11/2026 | Xem mục 8; PERF01 |
 
 ## 14. Bảng ghi lỗi
 
@@ -190,6 +247,7 @@ Cập nhật sau mỗi lần chạy. Trạng thái: PASS, FAIL hoặc BLOCKED.
 | BUG08 | TC03, TC08, TC09, TC10, TC11 | Thông báo lỗi CSV không có dấu tiếng Việt | Thấp | TV4 | Mở | |
 | BUG09 | IT14 | Với 200 tiến trình: nhãn Gantt chồng thành vệt đen, hộp thoại kết quả liệt kê toàn bộ Gantt quá lớn | Thấp | TV3 | Mở | Số liệu đúng, chỉ lỗi hiển thị |
 | BUG10 | IT13 | Thu nhỏ cửa sổ: Gantt bị cắt, không co giãn, không có thanh cuộn ngang; tiêu đề cột bị cắt | Trung bình | TV3 | Mở | Xác nhận bằng ảnh ngày 10/11/2026 |
+| PERF01 | TC12 | SJF cài đặt O(N^2): 10.000 tiến trình mất 5,5 đến 9,2 giây (FCFS dưới 21 ms); giao diện nhiều khả năng đứng hình khi chạy SJF với N lớn | Thấp | TV1 | Mở | Đề xuất dùng heap (BT, AT, ProcessID); đo lại bằng tests/stress_test.py sau khi sửa |
 
 ## 15. Kết quả Unit Test FCFS 
 
@@ -313,7 +371,7 @@ Mỗi lỗi phát hiện cần được ghi nhận vào mục 14 – Bảng ghi 
 - Kiểm thử tích hợp IT01 đến IT14: 11 PASS, 3 FAIL (IT11, IT12, IT13).
 - Edge input EC01 đến EC10: 10 PASS.
 - Lỗi mới: BUG04 đến BUG10 (2 lỗi mức Cao: BUG04, BUG05).
-- Kết luận: nghiệm thu chức năng (TC01 đến TC11) đạt. Còn 4 lỗi mở chờ nhóm sửa (BUG04, BUG05, BUG06, BUG10); TC12 ở giai đoạn sau.
+- Kết luận: nghiệm thu chức năng (TC01 đến TC11) đạt. Còn 4 lỗi mở chờ nhóm sửa (BUG04, BUG05, BUG06, BUG10); TC12 (hiệu năng) PASS, xem mục 8.
 
 ### 17.7. Minh chứng kiểm thử (thư mục docs/minh_chung)
 
