@@ -1,1 +1,18 @@
+﻿Scheduling Report: FCFS
+ProcessID,ArrivalTime,BurstTime,StartTime,CompletionTime,TurnaroundTime,WaitingTime,ResponseTime
+P1,0,7,0,7,7,0,0
+P2,2,4,7,11,9,5,5
+P3,4,1,11,12,8,7,7
+P4,5,4,12,16,11,7,7
 
+Summary Metrics
+AverageTurnaroundTime,8.75
+AverageWaitingTime,4.75
+AverageResponseTime,4.75
+
+Gantt Chart Trace Log
+ProcessID,StartTime,CompletionTime,Duration
+P1,0,7,7
+P2,7,11,4
+P3,11,12,1
+P4,12,16,4
