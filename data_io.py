@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
-DEFAULT_INPUT_FILE = PROJECT_DIR / "input" / "processes.csv"
+DEFAULT_INPUT_FILE = PROJECT_DIR / "input" / "input.csv"
 REQUIRED_COLUMNS = ["ProcessID", "ArrivalTime", "BurstTime"]
 
 
